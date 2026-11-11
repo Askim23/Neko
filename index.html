@@ -82,16 +82,31 @@ body.blink .cat .e-open{transform:scaleY(.08)}
 .zzz{opacity:0;fill:#8f78c9;font:700 22px sans-serif}
 .cat[data-s=sleep] .zzz{animation:zz 3s ease-in infinite}
 @keyframes zz{0%{opacity:0;transform:translateY(14px)}30%{opacity:1}100%{opacity:0;transform:translateY(-24px)}}
+.ov{overflow-y:auto;justify-content:safe center}
+#top{gap:8px}
+#top button{font-weight:800}
+#deco{position:absolute;left:14%;bottom:9%;z-index:2;font-size:1.7rem;display:flex;gap:2px}
+.bf{position:absolute;left:-12%;font-size:2.2rem;z-index:3;animation:fly 7s linear forwards}
+@keyframes fly{0%{left:-12%;transform:translateY(0)}25%{transform:translateY(-18px)}50%{transform:translateY(10px)}75%{transform:translateY(-14px)}100%{left:105%;transform:translateY(0)}}
+#shopg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:min(92vw,420px)}
+#shopg .opt{min-width:0;padding:10px 4px;font-size:.78rem}
+#shopg .opt.on{outline:3px solid #ff7aa8}
+#ach{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:min(92vw,420px);font-size:.75rem;font-weight:800}
+#ach span{background:#fff;border-radius:12px;padding:4px 8px;opacity:.35}
+#ach span.ok{opacity:1}
+.eyes{transition:transform .3s}
+.tongue{fill:#ff7a9c}
+.cat[data-s=blep] .e-happy,.cat[data-s=blep] .m-s,.cat[data-s=blep] .tongue{opacity:1}
 </style>
 </head>
 <body>
 <div id="top">
   <button id="nm">🐱 …</button>
   <span id="lv"></span>
-  <button id="snd">🔊</button>
+  <span id="stars2">⭐ 0</span><button data-a="dex">📖</button><button id="snd">🔊</button>
 </div>
 <div id="stage">
-  <div id="screen"><div id="stars">✦ ✧ ✦ ✧</div><div id="cat"></div><div id="poos"></div></div>
+  <div id="screen"><div id="stars">✦ ✧ ✦ ✧</div><div id="cat"></div><div id="poos"></div><div id="deco"></div></div>
   <div id="bubble"></div>
 </div>
 <div id="stats"></div>
@@ -101,7 +116,7 @@ body.blink .cat .e-open{transform:scaleY(.08)}
   <button data-a="play"><b>🧶</b>Jouer</button>
   <button data-a="sleep"><b>🌙</b>Dodo</button>
   <button data-a="bath"><b>🫧</b>Bain</button>
-  <button data-a="dex"><b>📖</b>Chats</button>
+  <button data-a="shop"><b>🛍️</b>Boutique</button>
 </div>
 
 <div class="ov" id="sheet" hidden>
@@ -112,6 +127,12 @@ body.blink .cat .e-open{transform:scaleY(.08)}
 <div class="ov" id="dex" hidden>
   <h2>Mes chats 📖</h2>
   <div id="dexg"></div>
+  <div id="ach"></div>
+  <button class="opt" data-close>Fermer</button>
+</div>
+<div class="ov" id="shop" hidden>
+  <h2>Boutique 🛍️ <span id="shs"></span></h2>
+  <div id="shopg"></div>
   <button class="opt" data-close>Fermer</button>
 </div>
 <div class="ov" id="game" hidden>
@@ -131,16 +152,30 @@ const COATS = [
   { n: "Blanc", c: "#fcfcff", b: "#ffffff", s: null, t: "", w: 15 },
   { n: "Calico", c: "#fff3e8", b: "#ffffff", s: "#f3a25b", s2: "#4a4358", t: "patch", w: 12 },
   { n: "Lavande", c: "#c9b6ff", b: "#fff0fb", s: "#a58df0", t: "stripe", w: 7 },
-  { n: "Étoilé ✨", c: "#ffd76a", b: "#fff8dc", s: "#f0b429", t: "stripe", w: 0, shiny: 1 }
+  { n: "Étoilé ✨", c: "#ffd76a", b: "#fff8dc", s: "#f0b429", t: "stripe", w: 0, shiny: 1 },
+  { n: "Siamois", c: "#f6e7d3", b: "#fffaf2", s: "#7a5a48", t: "points", w: 10, eye: "#5ab0ff", pt: "#7a5a48" },
+  { n: "Smoking", c: "#3d3b4d", b: "#ffffff", s: null, t: "tux", w: 12, eye: "#7fe0a0" },
+  { n: "Menthe", c: "#a8e6cf", b: "#f2fff9", s: "#7fcdb0", t: "stripe", w: 5 },
+  { n: "Bonbon", c: "#ffb3d1", b: "#fff0f6", s: "#ff8fb8", t: "stripe", w: 5 }
 ];
 function roll() {
   if (Math.random() < 1 / 48) return 6;
-  let r = Math.random() * 104;
-  for (let i = 0; i < 6; i++) { r -= COATS[i].w; if (r < 0) return i; }
+  let r = Math.random() * COATS.reduce((a, k) => a + k.w, 0);
+  for (let i = 0; i < COATS.length; i++) { r -= COATS[i].w; if (r < 0) return i; }
   return 0;
 }
 
-function catSVG(k, st, kit) {
+function acc(w) {
+  return ({
+    bow: '<g transform="translate(140 46)"><path d="M0 0L-17-11V11ZM0 0L17-11V11Z" fill="#ff6fa0"/><circle r="5" fill="#ff3d7f"/></g>',
+    flower: '<g transform="translate(62 44)">' + [0, 72, 144, 216, 288].map(a => `<circle cx="${Math.round(9 * Math.cos(a * Math.PI / 180))}" cy="${Math.round(9 * Math.sin(a * Math.PI / 180))}" r="6" fill="#ffc2dc"/>`).join("") + '<circle r="5" fill="#ffd24d"/></g>',
+    crown: '<path d="M66 42L72 14L88 32L100 10L112 32L128 14L134 42Z" fill="#ffd24d" stroke="#e0a800" stroke-width="3" stroke-linejoin="round"/>',
+    hat: '<rect x="72" y="4" width="56" height="38" rx="6" fill="#2d2236"/><rect x="72" y="28" width="56" height="9" fill="#ff6fa0"/><ellipse cx="100" cy="44" rx="42" ry="8" fill="#2d2236"/>',
+    glasses: '<rect x="54" y="80" width="36" height="28" rx="12" fill="#1f1a2b" opacity=".92"/><rect x="110" y="80" width="36" height="28" rx="12" fill="#1f1a2b" opacity=".92"/><path d="M90 92H110" stroke="#1f1a2b" stroke-width="4"/><path d="M60 86h10M116 86h10" stroke="#fff" stroke-width="3" opacity=".6"/>',
+    scarf: '<path d="M52 136Q100 160 148 136L152 154Q100 178 48 154Z" fill="#ff6f6f"/><rect x="124" y="150" width="16" height="36" rx="6" fill="#ff6f6f"/><path d="M124 166H140M124 176H140" stroke="#fff" stroke-width="3" opacity=".6"/>'
+  })[w] || "";
+}
+function catSVG(k, st, kit, wear) {
   const eyeF = k.eye || "#2d2236";
   const eye = (x, m) => `<g transform="translate(${x} 94)">
     <g class="l e-open"><ellipse rx="10" ry="13" fill="${eyeF}"/>${k.eye ? '<ellipse rx="4" ry="10" fill="#2d2236"/>' : ""}<circle cx="-3" cy="-5" r="4.5" fill="#fff"/><circle cx="3" cy="5" r="2" fill="#fff"/></g>
@@ -150,21 +185,22 @@ function catSVG(k, st, kit) {
   const marks = k.t === "stripe"
     ? `<path d="M100 44v14M85 47l3 12M115 47l-3 12M54 150q10 4 14 18M146 150q-10 4-14 18" stroke="${k.s}" stroke-width="5" stroke-linecap="round" fill="none"/>`
     : k.t === "patch"
-    ? `<ellipse cx="72" cy="66" rx="19" ry="13" fill="${k.s}"/><ellipse cx="138" cy="70" rx="15" ry="12" fill="${k.s2}"/><ellipse cx="142" cy="160" rx="20" ry="22" fill="${k.s}"/>` : "";
+    ? `<ellipse cx="72" cy="66" rx="19" ry="13" fill="${k.s}"/><ellipse cx="138" cy="70" rx="15" ry="12" fill="${k.s2}"/><ellipse cx="142" cy="160" rx="20" ry="22" fill="${k.s}"/>` : k.t === "points" ? `<ellipse cx="100" cy="108" rx="34" ry="30" fill="${k.s}" opacity=".4"/>` : k.t === "tux" ? `<path d="M100 42Q88 70 84 112H116Q112 70 100 42Z" fill="#fff"/>` : "";
   return `<svg class="cat" data-s="${st}" viewBox="0 0 200 200"><g class="cg${kit ? " kit" : ""}">
-    <path class="tail" d="M150 165C196 160 196 104 168 98" fill="none" stroke="${k.c}" stroke-width="17" stroke-linecap="round"/>
+    <path class="tail" d="M150 165C196 160 196 104 168 98" fill="none" stroke="${k.pt || k.c}" stroke-width="17" stroke-linecap="round"/>
     <ellipse cx="100" cy="152" rx="52" ry="40" fill="${k.c}"/><ellipse cx="100" cy="160" rx="30" ry="26" fill="${k.b}"/>
-    <ellipse cx="76" cy="188" rx="17" ry="10" fill="${k.b}"/><ellipse cx="124" cy="188" rx="17" ry="10" fill="${k.b}"/>
+    <ellipse cx="76" cy="188" rx="17" ry="10" fill="${k.pt || k.b}"/><ellipse cx="124" cy="188" rx="17" ry="10" fill="${k.pt || k.b}"/>
     <ellipse cx="100" cy="92" rx="60" ry="50" fill="${k.c}"/>
-    <path d="M50 72L46 20L90 48Z" fill="${k.c}"/><path d="M150 72L154 20L110 48Z" fill="${k.c}"/>
+    <path d="M50 72L46 20L90 48Z" fill="${k.pt || k.c}"/><path d="M150 72L154 20L110 48Z" fill="${k.pt || k.c}"/>
     <path d="M56 62L54 34L78 50Z" fill="#ffb3cf"/><path d="M144 62L146 34L122 50Z" fill="#ffb3cf"/>
     ${marks}
     <ellipse cx="100" cy="112" rx="24" ry="16" fill="${k.b}"/>
     <circle class="blush" cx="60" cy="116" r="9"/><circle class="blush" cx="140" cy="116" r="9"/>
-    ${eye(72, 0)}${eye(128, 1)}
+    <g class="eyes">${eye(72, 0)}${eye(128, 1)}</g>
     <path d="M-6-4H6L0 3Z" transform="translate(100 106)" fill="#ff8fa8"/>
-    <g transform="translate(100 112)"><path class="l m m-s" d="M-14 0Q-7 10 0 0Q7 10 14 0"/><path class="l m m-f" d="M-10 8Q0-2 10 8"/><ellipse class="l m-o" cx="0" cy="8" rx="7" ry="8"/></g>
+    <g transform="translate(100 112)"><ellipse class="l tongue" cx="6" cy="12" rx="6" ry="8"/><path class="l m m-s" d="M-14 0Q-7 10 0 0Q7 10 14 0"/><path class="l m m-f" d="M-10 8Q0-2 10 8"/><ellipse class="l m-o" cx="0" cy="8" rx="7" ry="8"/></g>
     <path class="wh" d="M60 108L28 100M60 114L28 118M140 108L172 100M140 114L172 118"/>
+    ${acc(wear)}
     ${k.shiny ? '<text x="150" y="40" font-size="20">✨</text><text x="30" y="50" font-size="16">✨</text>' : ""}
     <text class="zzz" x="150" y="40">z</text><text class="zzz" x="168" y="22" style="animation-delay:1.2s;font-size:28px">Z</text>
   </g></svg>`;
@@ -179,8 +215,21 @@ const eggSVG = t => `<svg class="cat" data-s="egg" viewBox="0 0 200 200"><g clas
 const newPet = () => ({ stage: "egg", ci: roll(), name: "", age: 0, f: 80, j: 80, e: 80, h: 100, poo: 0, asleep: false, taps: 0, fav: (Math.random() * 3) | 0, fk: false });
 let G = JSON.parse(localStorage.getItem(KEY) || "null") || { pet: newPet(), dex: [], streak: 0, lastDay: "", last: Date.now(), mute: false };
 const save = () => localStorage.setItem(KEY, JSON.stringify(G));
+G.stars ??= 0; G.own ??= []; G.wear ??= ""; G.touch ??= Date.now(); G.best ??= 0;
 const clamp = v => Math.max(0, Math.min(100, v));
 const FOODS = [{ i: "🐟", n: "Poisson", f: 25, j: 0 }, { i: "🥛", n: "Lait", f: 15, j: 5 }, { i: "🍬", n: "Friandise", f: 10, j: 12 }];
+const ITEMS = [
+  { id: "bow", i: "🎀", n: "Nœud", p: 20, t: "acc" }, { id: "flower", i: "🌸", n: "Fleur", p: 30, t: "acc" },
+  { id: "scarf", i: "🧣", n: "Écharpe", p: 40, t: "acc" }, { id: "glasses", i: "🕶️", n: "Lunettes", p: 60, t: "acc" },
+  { id: "hat", i: "🎩", n: "Chapeau", p: 80, t: "acc" }, { id: "crown", i: "👑", n: "Couronne", p: 150, t: "acc" },
+  { id: "teddy", i: "🧸", n: "Nounours", p: 30, t: "deco" }, { id: "plant", i: "🪴", n: "Plante", p: 40, t: "deco" },
+  { id: "lamp", i: "🏮", n: "Lanterne", p: 50, t: "deco" }, { id: "fish", i: "🐠", n: "Aquarium", p: 60, t: "deco" }
+];
+const ACH = [
+  ["🍼 Premier chaton", () => G.dex.length >= 1], ["🔥 3 jours", () => G.streak >= 3], ["🔥 7 jours", () => G.streak >= 7],
+  ["🐈 Chat adulte", () => G.pet.stage === "cat" || G.fare], ["🎨 5 robes", () => G.dex.length >= 5],
+  ["🌈 Toutes les robes", () => G.dex.length >= COATS.length], ["🧶 Record 20+", () => G.best >= 20], ["🛍️ 3 achats", () => G.own.length >= 3]
+];
 const LVL_EVO = 6, FAREWELL_MIN = 72 * 60;
 const lvl = p => Math.floor(p.age / 60);
 
@@ -247,13 +296,15 @@ function feel(s, ms = 2500) { tmp = { s, until: Date.now() + ms }; render(); set
 function render() {
   const p = G.pet, k = COATS[p.ci];
   if (p.stage === "egg" && (p.taps >= 3 || p.age >= 10)) return hatch();
-  const key = p.stage + p.ci + (p.stage === "egg" ? p.taps : "");
-  if (key !== lastKey) { $("#cat").innerHTML = p.stage === "egg" ? eggSVG(p.taps) : catSVG(k, mood(), p.stage === "kitten"); lastKey = key; }
+  const key = p.stage + p.ci + G.wear + (p.stage === "egg" ? p.taps : "");
+  if (key !== lastKey) { $("#cat").innerHTML = p.stage === "egg" ? eggSVG(p.taps) : catSVG(k, mood(), p.stage === "kitten", G.wear); lastKey = key; }
   const svg = $("#cat svg"); if (svg && p.stage !== "egg") svg.dataset.s = mood();
   const h = new Date().getHours();
   $("#screen").className = p.asleep || h >= 21 || h < 5 ? "night" : (h >= 7 && h < 18 ? "" : "dusk");
   $("#nm").textContent = "🐱 " + (p.name || "Œuf");
   $("#lv").textContent = p.stage === "egg" ? "" : `Niv. ${lvl(p)}${G.streak > 1 ? "  🔥" + G.streak : ""}`;
+  $("#stars2").textContent = "⭐ " + G.stars;
+  $("#deco").innerHTML = ITEMS.filter(x => x.t === "deco" && G.own.includes(x.id)).map(x => x.i).join("");
   $("#snd").textContent = G.mute ? "🔇" : "🔊";
   $("#stats").innerHTML = [["🐟", p.f], ["🧶", p.j], ["⚡", p.e], ["🫧", p.h]]
     .map(([i, v]) => `<div class="st">${i}<div class="bar"><i class="${v < 25 ? "low" : ""}" style="width:${v}%"></i></div></div>`).join("");
@@ -276,10 +327,10 @@ function care() { // série quotidienne
   const d = new Date().toDateString();
   if (G.lastDay === d) return;
   const y = new Date(Date.now() - 864e5).toDateString();
-  G.streak = G.lastDay === y ? G.streak + 1 : 1; G.lastDay = d;
+  G.streak = G.lastDay === y ? G.streak + 1 : 1; G.lastDay = d; G.stars += 3;
   if ([3, 7, 30, 100].includes(G.streak)) say(`🔥 ${G.streak} jours de suite !`, 4500);
 }
-function act(fn) { advance(); fn(); care(); save(); render(); }
+function act(fn) { advance(); G.touch = Date.now(); fn(); care(); save(); render(); }
 
 const ACTIONS = {
   feed() { const p = G.pet; if (p.stage === "egg") return; if (p.asleep) return say("Chut, il dort 🌙");
@@ -287,33 +338,44 @@ const ACTIONS = {
     $("#sheet").hidden = false; },
   play() { const p = G.pet; if (p.stage === "egg") return;
     if (p.asleep) return say("Chut, il dort 🌙"); if (p.e < 15) return say("Trop fatigué pour jouer…");
-    const g = $("#game"), b = $("#ball"); let sc = 0; $("#sc").textContent = 0; g.hidden = false;
-    const mv = () => { b.style.left = 8 + Math.random() * 74 + "%"; b.style.top = 22 + Math.random() * 58 + "%"; }; mv();
-    b.onpointerdown = e => { e.stopPropagation(); sc++; $("#sc").textContent = sc; burst(e.clientX, e.clientY, ["✨"], 2); pi(); mv(); };
-    const iv = setInterval(mv, 900);
-    setTimeout(() => { clearInterval(iv); g.hidden = true;
-      act(() => { p.j = clamp(p.j + 8 + sc * 4); p.e = clamp(p.e - 10); });
-      feel(sc > 4 ? "love" : "happy"); say(sc > 4 ? "Quelle chasseuse ! 🧶" : "Miaou ! 🧶"); }, 10000); },
+    const g = $("#game"), b = $("#ball"), T = [["🧶", 1], ["🧶", 1], ["🐭", 2], ["🐟", 3]];
+    let sc = 0, tm, alive = true; $("#sc").textContent = 0; g.hidden = false;
+    const mv = () => { const t = pick(T); b.textContent = t[0]; b.dataset.p = t[1];
+      b.style.left = 8 + Math.random() * 74 + "%"; b.style.top = 22 + Math.random() * 58 + "%";
+      if (alive) tm = setTimeout(mv, Math.max(450, 950 - sc * 30)); }; mv();
+    b.onpointerdown = e => { e.stopPropagation(); sc += +b.dataset.p; $("#sc").textContent = sc; burst(e.clientX, e.clientY, ["✨"], 2); pi(); clearTimeout(tm); mv(); };
+    setTimeout(() => { alive = false; clearTimeout(tm); g.hidden = true;
+      const st = Math.ceil(sc / 3), rec = sc > G.best; if (rec) G.best = sc; G.stars += st;
+      act(() => { p.j = clamp(p.j + 8 + sc * 3); p.e = clamp(p.e - 10); });
+      feel(sc > 8 ? "love" : "happy"); say(`${rec ? "Nouveau record ! " : ""}${sc} pts · +${st} ⭐`, 4000); }, 10000); },
+  shop() { shopRender(); $("#shop").hidden = false; },
   sleep() { const p = G.pet; if (p.stage === "egg") return; act(() => { p.asleep = !p.asleep; });
     say(p.asleep ? "Bonne nuit 🌙" : "Bien dormi ! ☀️"); if (!p.asleep) meow(); },
   bath() { const p = G.pet; if (p.stage === "egg") return; if (p.asleep) return say("Chut, il dort 🌙");
     act(() => { p.h = 100; p.poo = 0; }); const [x, y] = mid(); burst(x, y, ["🫧"], 7); feel("happy"); say("Tout propre ! 🫧"); },
   dex() { $("#dexg").innerHTML = COATS.map((k, i) => `<div class="${G.dex.includes(i) ? "" : "lock"}">${catSVG(k, "idle", true).replace('class="cat"', 'class="cat" style="animation:none"')}${G.dex.includes(i) ? k.n : "???"}</div>`).join("");
+    $("#ach").innerHTML = ACH.map(([t, f]) => `<span class="${f() ? "ok" : ""}">${t}</span>`).join("");
     $("#dex").hidden = false; },
   grow() { const p = G.pet; act(() => { p.stage = "cat"; }); lastKey = ""; render(); meow();
     const [x, y] = mid(); burst(x, y, ["✨", "💖"], 8); say(`${p.name} a bien grandi ! 😻`, 4500); feel("love", 3500); },
   bye() { if (!confirm("Confier ce chat à une belle famille ? Un nouvel œuf apparaîtra.")) return;
-    const n = G.pet.name; G.pet = newPet(); lastKey = ""; save(); render(); say(`${n} est parti vers une famille aimante 🏡💛`, 5000); }
+    const n = G.pet.name; G.fare = 1; G.stars += 20; G.pet = newPet(); lastKey = ""; save(); render(); say(`${n} est parti vers une famille aimante 🏡💛`, 5000); }
 };
 document.addEventListener("click", e => {
   const a = e.target.closest("[data-a]"); if (a) { ACTIONS[a.dataset.a](); return; }
+  const it = e.target.closest("[data-it]");
+  if (it) { const x = ITEMS.find(v => v.id === it.dataset.it), own = G.own.includes(x.id);
+    if (!own) { if (G.stars < x.p) { say("Il te manque des ⭐ — joue avec ton chat !"); return; }
+      G.stars -= x.p; G.own.push(x.id); if (x.t === "acc") G.wear = x.id; snd([[880, 0], [1320, .1], [1760, .2]], "sine", .06, .35); say(`${x.i} ${x.n} acheté !`); }
+    else if (x.t === "acc") G.wear = G.wear === x.id ? "" : x.id;
+    save(); lastKey = ""; render(); shopRender(); return; }
   const f = e.target.closest("[data-f]");
   if (f) { const p = G.pet, d = FOODS[+f.dataset.f], fav = +f.dataset.f === p.fav;
     $("#sheet").hidden = true;
     act(() => { p.f = clamp(p.f + d.f + (fav ? 10 : 0)); p.j = clamp(p.j + d.j + (fav ? 10 : 0)); if (fav) p.fk = true; });
     feel("eat", 1800); setTimeout(() => feel(fav ? "love" : "happy", 2000), 1800); pi();
     say(fav ? `❤️ ${d.n}, son préféré !` : "Miam ! 😋"); return; }
-  if (e.target.closest("[data-close]")) { $("#sheet").hidden = true; $("#dex").hidden = true; }
+  if (e.target.closest("[data-close]")) { $("#sheet").hidden = true; $("#dex").hidden = true; $("#shop").hidden = true; }
   if (e.target.closest("#snd")) { G.mute = !G.mute; save(); render(); }
   if (e.target.closest("#nm") && G.pet.stage !== "egg") { const n = prompt("Nouveau nom ?", G.pet.name); if (n) { G.pet.name = n.slice(0, 14); save(); render(); } }
   if (e.target.closest("#poos span")) { act(() => { G.pet.poo = Math.max(0, G.pet.poo - 1); G.pet.h = clamp(G.pet.h + 10); }); pi(); }
@@ -327,9 +389,45 @@ $("#cat").addEventListener("pointerdown", e => { // caresse (ou tape sur l’œu
   feel("love", 2200); if (navigator.vibrate) navigator.vibrate(20);
 });
 
+function shopRender() {
+  $("#shs").textContent = "⭐ " + G.stars;
+  $("#shopg").innerHTML = ITEMS.map(x => { const own = G.own.includes(x.id), on = x.t === "acc" && G.wear === x.id;
+    return `<button class="opt${on ? " on" : ""}" data-it="${x.id}"><b>${x.i}</b>${x.n}<br>${own ? (x.t === "acc" ? (on ? "Retirer" : "Porter") : "✓") : "⭐ " + x.p}</button>`; }).join("");
+}
+/* ---------- Brosse (glisser sur le chat), regard qui suit le doigt ---------- */
+let bx = null, bd = 0;
+$("#cat").addEventListener("pointerdown", e => { bx = [e.clientX, e.clientY]; bd = 0; });
+document.addEventListener("pointermove", e => {
+  const ey = $(".eyes"); if (ey) ey.style.transform = `translate(${(e.clientX / innerWidth - .5) * 10}px,${(e.clientY / innerHeight - .3) * 8}px)`;
+  if (bx && G.pet.stage !== "egg" && !G.pet.asleep) {
+    bd += Math.hypot(e.clientX - bx[0], e.clientY - bx[1]); bx = [e.clientX, e.clientY];
+    if (bd > 260) { bd = 0; act(() => { G.pet.j = clamp(G.pet.j + 2); }); burst(e.clientX, e.clientY, ["💗", "✨"], 1);
+      snd([[110, 0], [150, .1], [110, .2]], "sawtooth", .025, .3); feel("love", 1500); }
+  }
+});
+document.addEventListener("pointerup", () => { bx = null; });
+/* ---------- Papillon à attraper ---------- */
+function butterfly() {
+  if (G.pet.asleep || G.pet.stage === "egg") return;
+  const b = document.createElement("span"); b.className = "bf"; b.textContent = "🦋"; b.style.top = 12 + Math.random() * 40 + "%";
+  b.addEventListener("pointerdown", e => { e.stopPropagation(); G.stars += 2; act(() => { G.pet.j = clamp(G.pet.j + 6); });
+    burst(e.clientX, e.clientY, ["⭐", "✨"], 4); pi(); feel("happy"); say("Attrapé ! +2 ⭐"); b.remove(); });
+  b.addEventListener("animationend", () => b.remove());
+  $("#screen").appendChild(b);
+}
+setInterval(() => { if (Math.random() < .35) butterfly(); }, 40000);
+
 /* ---------- Vie : clignements, besoins, écran allumé ---------- */
 setInterval(() => { if (!G.pet.asleep && G.pet.stage !== "egg") { document.body.classList.add("blink"); setTimeout(() => document.body.classList.remove("blink"), 140); } }, 4200);
-setInterval(() => { advance(); render(); }, 5000);
+setInterval(() => {
+  advance(); const p = G.pet, h = new Date().getHours();
+  if (p.stage !== "egg") {
+    if (!p.asleep && (h >= 23 || h < 6) && Date.now() - G.touch > 300000) { p.asleep = true; save(); say("Bonne nuit… 🌙"); }
+    else if (p.asleep && h >= 7 && h < 23 && p.e >= 100) { p.asleep = false; save(); say("Bien dormi ! ☀️"); }
+    else if (!p.asleep && mood() === "idle" && Math.random() < .12) feel("blep", 1300);
+  }
+  render();
+}, 5000);
 setInterval(() => {
   const p = G.pet; if (p.asleep || p.stage === "egg") return;
   const need = p.f < 30 ? "J’ai faim… 🐟" : p.h < 30 ? "Je suis tout sale… 🫧" : p.j < 30 ? "Joue avec moi ! 🧶" : p.e < 30 ? "J’ai sommeil… 🌙" : "";
