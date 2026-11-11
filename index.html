@@ -97,16 +97,22 @@ body.blink .cat .e-open{transform:scaleY(.08)}
 .eyes{transition:transform .3s}
 .tongue{fill:#ff7a9c}
 .cat[data-s=blep] .e-happy,.cat[data-s=blep] .m-s,.cat[data-s=blep] .tongue{opacity:1}
+#bg{position:absolute;inset:0;width:100%;height:100%}
+#screen::after{display:none}
+.cloud{animation:drift 24s ease-in-out infinite alternate}
+@keyframes drift{to{transform:translateX(26px)}}
+input{user-select:text;-webkit-user-select:text;width:min(92vw,360px);padding:10px 12px;border-radius:12px;border:2px solid #ffb3cf;font:inherit;color:#7a3b5a;background:#fff}
+#cfg p{font-size:.8rem;max-width:360px;line-height:1.4}
 </style>
 </head>
 <body>
 <div id="top">
   <button id="nm">🐱 …</button>
   <span id="lv"></span>
-  <span id="stars2">⭐ 0</span><button data-a="dex">📖</button><button id="snd">🔊</button>
+  <span id="stars2">⭐ 0</span><button data-a="dex">📖</button><button data-a="cfg">⚙️</button>
 </div>
 <div id="stage">
-  <div id="screen"><div id="stars">✦ ✧ ✦ ✧</div><div id="cat"></div><div id="poos"></div><div id="deco"></div></div>
+  <div id="screen"><svg id="bg" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice"></svg><div id="cat"></div><div id="poos"></div><div id="deco"></div></div>
   <div id="bubble"></div>
 </div>
 <div id="stats"></div>
@@ -128,6 +134,17 @@ body.blink .cat .e-open{transform:scaleY(.08)}
   <h2>Mes chats 📖</h2>
   <div id="dexg"></div>
   <div id="ach"></div>
+  <button class="opt" data-close>Fermer</button>
+</div>
+<div class="ov" id="cfg" hidden>
+  <h2>Réglages ⚙️</h2>
+  <button class="opt" id="snd">🔊</button>
+  <p>Alertes sur ton téléphone quand Neko a besoin de toi. Le vieux téléphone doit rester allumé avec l’app ouverte. Pas d’alerte la nuit (22 h – 8 h).</p>
+  <input id="ntf" placeholder="ntfy : nom du sujet (ex. neko-4821)" autocomplete="off">
+  <input id="tgt" placeholder="Telegram : token du bot" autocomplete="off">
+  <input id="tgc" placeholder="Telegram : chat id" autocomplete="off">
+  <div class="row"><button class="opt" id="tgd">🔎 Trouver mon chat id</button><button class="opt" id="tgs">📨 Envoyer un test</button></div>
+  <p id="cfgm"></p>
   <button class="opt" data-close>Fermer</button>
 </div>
 <div class="ov" id="shop" hidden>
@@ -175,50 +192,129 @@ function acc(w) {
     scarf: '<path d="M52 136Q100 160 148 136L152 154Q100 178 48 154Z" fill="#ff6f6f"/><rect x="124" y="150" width="16" height="36" rx="6" fill="#ff6f6f"/><path d="M124 166H140M124 176H140" stroke="#fff" stroke-width="3" opacity=".6"/>'
   })[w] || "";
 }
+let CID = 0;
+const sh = (hex, a) => { const n = parseInt(hex.slice(1), 16), t = a < 0 ? 0 : 255, q = Math.abs(a);
+  const f = v => Math.round(v + (t - v) * q);
+  return "#" + ((1 << 24) + (f(n >> 16) << 16) + (f((n >> 8) & 255) << 8) + f(n & 255)).toString(16).slice(1); };
+const IRIS = { Roux: "#e8a53a", Gris: "#6dbb8a", Noir: "#ffd24d", Blanc: "#6fb7ff", Calico: "#d9a441", Lavande: "#b57bff", "Étoilé ✨": "#ff9ad5", Siamois: "#5ab0ff", Smoking: "#7fe0a0", Menthe: "#3fbf9b", Bonbon: "#ff7aa8" };
+
 function catSVG(k, st, kit, wear) {
-  const eyeF = k.eye || "#2d2236";
+  const u = "g" + (++CID), c = k.c, ol = sh(c, -.4), ir = IRIS[k.n] || "#6b4a9e", pt = k.pt || c;
+  const lc = (k.n === "Noir" || k.n === "Smoking") ? "#ffe9a8" : "#2d2236", mc = k.n === "Noir" ? "#ffe9a8" : "#2d2236";
+  const D = "M150 165C196 160 196 104 168 98";
   const eye = (x, m) => `<g transform="translate(${x} 94)">
-    <g class="l e-open"><ellipse rx="10" ry="13" fill="${eyeF}"/>${k.eye ? '<ellipse rx="4" ry="10" fill="#2d2236"/>' : ""}<circle cx="-3" cy="-5" r="4.5" fill="#fff"/><circle cx="3" cy="5" r="2" fill="#fff"/></g>
-    <path class="l e-happy" d="M-10 4Q0-12 10 4"/><path class="l e-sleep" d="M-10 0Q0 9 10 0"/>
+    <g class="l e-open"><ellipse rx="12" ry="14.5" fill="url(#${u}i)"/><ellipse rx="6" ry="10" fill="#1f1530"/><ellipse cx="-4" cy="-6" rx="4.6" ry="5" fill="#fff"/><circle cx="4" cy="6" r="2.4" fill="#fff"/>
+      <path d="M-12-4Q0-19 12-4" fill="none" stroke="#1f1530" stroke-width="3.5" stroke-linecap="round"/><path d="${m ? "M12-4l5-4" : "M-12-4l-5-4"}" stroke="#1f1530" stroke-width="3" stroke-linecap="round"/></g>
+    <path class="l e-happy" style="stroke:${lc}" d="M-10 4Q0-12 10 4"/><path class="l e-sleep" style="stroke:${lc}" d="M-10 0Q0 9 10 0"/>
     <path class="l e-heart" d="M0 11C-18-2-14-16-5-14-2-13 0-10 0-8 0-10 2-13 5-14 14-16 18-2 0 11Z"/>
     <ellipse class="l tear" cx="${m ? 8 : -8}" cy="24" rx="3" ry="5"/></g>`;
   const marks = k.t === "stripe"
-    ? `<path d="M100 44v14M85 47l3 12M115 47l-3 12M54 150q10 4 14 18M146 150q-10 4-14 18" stroke="${k.s}" stroke-width="5" stroke-linecap="round" fill="none"/>`
+    ? `<path d="M100 44v14M85 47l3 12M115 47l-3 12M54 150q10 4 14 18M146 150q-10 4-14 18M46 92l14 3M46 101l14-1M154 92l-14 3M154 101l-14-1" stroke="${k.s}" stroke-width="4.5" stroke-linecap="round" fill="none"/>`
     : k.t === "patch"
-    ? `<ellipse cx="72" cy="66" rx="19" ry="13" fill="${k.s}"/><ellipse cx="138" cy="70" rx="15" ry="12" fill="${k.s2}"/><ellipse cx="142" cy="160" rx="20" ry="22" fill="${k.s}"/>` : k.t === "points" ? `<ellipse cx="100" cy="108" rx="34" ry="30" fill="${k.s}" opacity=".4"/>` : k.t === "tux" ? `<path d="M100 42Q88 70 84 112H116Q112 70 100 42Z" fill="#fff"/>` : "";
-  return `<svg class="cat" data-s="${st}" viewBox="0 0 200 200"><g class="cg${kit ? " kit" : ""}">
-    <path class="tail" d="M150 165C196 160 196 104 168 98" fill="none" stroke="${k.pt || k.c}" stroke-width="17" stroke-linecap="round"/>
-    <ellipse cx="100" cy="152" rx="52" ry="40" fill="${k.c}"/><ellipse cx="100" cy="160" rx="30" ry="26" fill="${k.b}"/>
-    <ellipse cx="76" cy="188" rx="17" ry="10" fill="${k.pt || k.b}"/><ellipse cx="124" cy="188" rx="17" ry="10" fill="${k.pt || k.b}"/>
-    <ellipse cx="100" cy="92" rx="60" ry="50" fill="${k.c}"/>
-    <path d="M50 72L46 20L90 48Z" fill="${k.pt || k.c}"/><path d="M150 72L154 20L110 48Z" fill="${k.pt || k.c}"/>
-    <path d="M56 62L54 34L78 50Z" fill="#ffb3cf"/><path d="M144 62L146 34L122 50Z" fill="#ffb3cf"/>
+    ? `<ellipse cx="72" cy="66" rx="19" ry="13" fill="${k.s}"/><ellipse cx="138" cy="70" rx="15" ry="12" fill="${k.s2}"/><ellipse cx="142" cy="160" rx="20" ry="22" fill="${k.s}"/>`
+    : k.t === "points" ? `<ellipse cx="100" cy="108" rx="34" ry="30" fill="${k.s}" opacity=".4"/>`
+    : k.t === "tux" ? `<path d="M100 42Q88 70 84 112H116Q112 70 100 42Z" fill="#fff"/>` : "";
+  const paw = x => `<ellipse cx="${x}" cy="188" rx="16" ry="9" fill="${k.pt || sh(k.b, -.03)}" stroke="${ol}" stroke-width="2.5"/><path d="M${x - 7} 186v5M${x} 187v5M${x + 7} 186v5" stroke="${ol}" stroke-width="2" opacity=".5" stroke-linecap="round"/>`;
+  return `<svg class="cat" data-s="${st}" viewBox="0 0 200 200"><defs>
+    <radialGradient id="${u}b" cx=".4" cy=".25" r=".9"><stop offset="0" stop-color="${sh(c, .3)}"/><stop offset=".6" stop-color="${c}"/><stop offset="1" stop-color="${sh(c, -.2)}"/></radialGradient>
+    <radialGradient id="${u}t" cx=".5" cy=".3" r=".8"><stop offset="0" stop-color="${sh(k.b, .4)}"/><stop offset="1" stop-color="${sh(k.b, -.12)}"/></radialGradient>
+    <radialGradient id="${u}i" cx=".5" cy=".7" r=".75"><stop offset="0" stop-color="${sh(ir, .4)}"/><stop offset="1" stop-color="${sh(ir, -.3)}"/></radialGradient></defs>
+  <g class="cg${kit ? " kit" : ""}">
+    <ellipse cx="100" cy="194" rx="62" ry="7" fill="#000" opacity=".14"/>
+    <g class="tail"><path d="${D}" fill="none" stroke="${ol}" stroke-width="21" stroke-linecap="round"/><path d="${D}" fill="none" stroke="${pt}" stroke-width="17" stroke-linecap="round"/>${k.t === "stripe" ? `<path d="${D}" fill="none" stroke="${k.s}" stroke-width="17" stroke-dasharray="5 11" opacity=".7"/>` : ""}</g>
+    <ellipse cx="100" cy="152" rx="52" ry="40" fill="url(#${u}b)" stroke="${ol}" stroke-width="3"/>
+    <ellipse cx="100" cy="162" rx="30" ry="24" fill="url(#${u}t)"/>
+    <path d="M86 138q4 8 8 0M96 136q4 9 8 0M106 138q4 8 8 0" fill="none" stroke="${sh(k.b, -.25)}" stroke-width="2" stroke-linecap="round"/>
+    <rect x="66" y="158" width="26" height="30" rx="13" fill="url(#${u}b)" stroke="${ol}" stroke-width="3"/><rect x="108" y="158" width="26" height="30" rx="13" fill="url(#${u}b)" stroke="${ol}" stroke-width="3"/>
+    ${paw(79)}${paw(121)}
+    <ellipse cx="100" cy="138" rx="46" ry="9" fill="#000" opacity=".1"/>
+    <path d="M50 72L46 20L90 48Z" fill="${pt}" stroke="${ol}" stroke-width="3" stroke-linejoin="round"/><path d="M150 72L154 20L110 48Z" fill="${pt}" stroke="${ol}" stroke-width="3" stroke-linejoin="round"/>
+    <path d="M57 62L54 34L78 50Z" fill="#ffb3cf"/><path d="M143 62L146 34L122 50Z" fill="#ffb3cf"/>
+    <path d="M60 52l3-10M66 56l4-9M140 52l-3-10M134 56l-4-9" stroke="#ff8fb3" stroke-width="2" stroke-linecap="round"/>
+    <path d="M42 98L26 102L40 110L28 120L48 118Z" fill="${c}" stroke="${ol}" stroke-width="2.5" stroke-linejoin="round"/><path d="M158 98L174 102L160 110L172 120L152 118Z" fill="${c}" stroke="${ol}" stroke-width="2.5" stroke-linejoin="round"/>
+    <ellipse cx="100" cy="92" rx="60" ry="50" fill="url(#${u}b)" stroke="${ol}" stroke-width="3"/>
+    <ellipse cx="82" cy="62" rx="16" ry="8" fill="#fff" opacity=".18" transform="rotate(-20 82 62)"/>
     ${marks}
-    <ellipse cx="100" cy="112" rx="24" ry="16" fill="${k.b}"/>
-    <circle class="blush" cx="60" cy="116" r="9"/><circle class="blush" cx="140" cy="116" r="9"/>
+    <ellipse cx="100" cy="112" rx="24" ry="16" fill="url(#${u}t)"/>
+    <g fill="${sh(c, -.3)}" opacity=".35"><circle cx="86" cy="112" r="1.6"/><circle cx="82" cy="116" r="1.6"/><circle cx="90" cy="117" r="1.6"/><circle cx="114" cy="112" r="1.6"/><circle cx="118" cy="116" r="1.6"/><circle cx="110" cy="117" r="1.6"/></g>
+    <circle class="blush" cx="58" cy="116" r="9"/><circle class="blush" cx="142" cy="116" r="9"/>
     <g class="eyes">${eye(72, 0)}${eye(128, 1)}</g>
-    <path d="M-6-4H6L0 3Z" transform="translate(100 106)" fill="#ff8fa8"/>
-    <g transform="translate(100 112)"><ellipse class="l tongue" cx="6" cy="12" rx="6" ry="8"/><path class="l m m-s" d="M-14 0Q-7 10 0 0Q7 10 14 0"/><path class="l m m-f" d="M-10 8Q0-2 10 8"/><ellipse class="l m-o" cx="0" cy="8" rx="7" ry="8"/></g>
-    <path class="wh" d="M60 108L28 100M60 114L28 118M140 108L172 100M140 114L172 118"/>
+    <path d="M-7-4Q0-8 7-4Q5 2 0 5Q-5 2-7-4Z" transform="translate(100 105)" fill="#ff7f9f" stroke="#e0607f" stroke-width="1"/><circle cx="97" cy="102" r="1.6" fill="#fff" opacity=".8"/>
+    <g transform="translate(100 112)"><ellipse class="l tongue" cx="6" cy="12" rx="6" ry="8"/><path class="l m m-s" style="stroke:${mc}" d="M-14 0Q-7 10 0 0Q7 10 14 0"/><path class="l m m-f" style="stroke:${mc}" d="M-10 8Q0-2 10 8"/><ellipse class="l m-o" cx="0" cy="8" rx="7" ry="8"/></g>
+    <path class="wh" d="M60 106Q42 98 22 99M60 112Q42 112 20 116M60 118Q44 126 26 134M140 106Q158 98 178 99M140 112Q158 112 180 116M140 118Q156 126 174 134"/>
     ${acc(wear)}
     ${k.shiny ? '<text x="150" y="40" font-size="20">✨</text><text x="30" y="50" font-size="16">✨</text>' : ""}
     <text class="zzz" x="150" y="40">z</text><text class="zzz" x="168" y="22" style="animation-delay:1.2s;font-size:28px">Z</text>
   </g></svg>`;
 }
-const eggSVG = t => `<svg class="cat" data-s="egg" viewBox="0 0 200 200"><g class="egg">
-  <ellipse cx="100" cy="115" rx="52" ry="66" fill="#fff6e6" stroke="#f0c9a8" stroke-width="4"/>
-  <circle cx="82" cy="95" r="9" fill="#ffd0e0"/><circle cx="118" cy="130" r="12" fill="#cfe9ff"/><circle cx="104" cy="162" r="7" fill="#ffe29a"/>
-  ${t > 0 ? '<path d="M66 100l14 9-9 10 15 9" fill="none" stroke="#c9a27c" stroke-width="3" stroke-linecap="round"/>' : ""}
-  ${t > 1 ? '<path d="M134 84l-12 10 10 8-13 10" fill="none" stroke="#c9a27c" stroke-width="3" stroke-linecap="round"/>' : ""}</g></svg>`;
+const eggSVG = t => `<svg class="cat" data-s="egg" viewBox="0 0 200 200"><defs><radialGradient id="eg" cx=".38" cy=".3" r=".85"><stop offset="0" stop-color="#fffdf6"/><stop offset=".7" stop-color="#ffe9c9"/><stop offset="1" stop-color="#f3c99a"/></radialGradient></defs>
+  <ellipse cx="100" cy="194" rx="46" ry="7" fill="#000" opacity=".14"/><g class="egg">
+  <ellipse cx="100" cy="115" rx="52" ry="66" fill="url(#eg)" stroke="#e0b48a" stroke-width="3"/>
+  <circle cx="82" cy="102" r="9" fill="#ffc0d8"/><circle cx="122" cy="132" r="12" fill="#bfe0ff"/><circle cx="104" cy="164" r="7" fill="#ffe08a"/><circle cx="116" cy="90" r="5" fill="#d5f2c8"/>
+  <ellipse cx="78" cy="78" rx="8" ry="15" fill="#fff" opacity=".6" transform="rotate(25 78 78)"/>
+  ${t > 0 ? '<path d="M66 100l14 9-9 10 15 9" fill="none" stroke="#b98a5e" stroke-width="3" stroke-linecap="round"/>' : ""}
+  ${t > 1 ? '<path d="M134 84l-12 10 10 8-13 10" fill="none" stroke="#b98a5e" stroke-width="3" stroke-linecap="round"/>' : ""}</g></svg>`;
+
+/* ---------- Décors (changent avec l’heure réelle) ---------- */
+const PH = {
+  day:   { s1: "#8fd3ff", s2: "#eaf8ff", wall: "#ffe6ef", floor: "#f0c8a0", g1: "#9ad88c", g2: "#78c96f", sea: "#6ec6ff", sand: "#ffe3a8", bw: "#e8dcff" },
+  dusk:  { s1: "#ff9e7d", s2: "#ffd9b8", wall: "#f5c6c9", floor: "#d9a37e", g1: "#a8b56f", g2: "#8a9d5e", sea: "#ff9d8a", sand: "#f0c58f", bw: "#d9bfe0" },
+  night: { s1: "#1d1b3a", s2: "#4a3f7a", wall: "#5b4f86", floor: "#6a5a7c", g1: "#3e6b5a", g2: "#2f5a4c", sea: "#243a73", sand: "#8a7a9a", bw: "#3d3566" }
+};
+const sunSVG = (ph, x, y, r) => ph === "night"
+  ? `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff8d6"/><circle cx="${x - r * .3}" cy="${y + r * .2}" r="${r * .25}" fill="#e9e2b8"/><circle cx="${x + r * .35}" cy="${y - r * .3}" r="${r * .18}" fill="#e9e2b8"/>`
+  : `<circle cx="${x}" cy="${y}" r="${r * 1.7}" fill="${ph === "day" ? "#fff2a8" : "#ffb08a"}" opacity=".5"/><circle cx="${x}" cy="${y}" r="${r}" fill="${ph === "day" ? "#ffd84d" : "#ff8a5c"}"/>`;
+const starsSVG = (ph, pts) => ph === "night" ? pts.map(([x, y]) => `<path d="M${x} ${y - 3}L${x + 1} ${y - 1}L${x + 3} ${y}L${x + 1} ${y + 1}L${x} ${y + 3}L${x - 1} ${y + 1}L${x - 3} ${y}L${x - 1} ${y - 1}Z" fill="#fff" opacity=".9"/>`).join("") : "";
+const cloudSVG = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})"><g class="cloud"><ellipse rx="16" ry="7" fill="#fff" opacity=".85"/><ellipse cx="-9" cy="2" rx="9" ry="6" fill="#fff" opacity=".85"/><ellipse cx="10" cy="2" rx="10" ry="6" fill="#fff" opacity=".85"/></g></g>`;
+
+function sceneSVG(id, ph) {
+  const c = PH[ph], night = ph === "night";
+  const sky = `<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c.s1}"/><stop offset="1" stop-color="${c.s2}"/></linearGradient></defs>`;
+  const SP = [[20, 24], [60, 14], [110, 30], [150, 16], [180, 44], [36, 60], [92, 12], [130, 52]];
+  if (id === "sc_garden") {
+    const leaf = night ? "#2f6b57" : "#5dbb7a";
+    return `${sky}<rect width="200" height="200" fill="url(#sk)"/>${sunSVG(ph, 150, 42, 14)}${starsSVG(ph, SP)}${night ? "" : cloudSVG(50, 36) + cloudSVG(110, 62, .7)}
+    <path d="M0 126Q50 96 100 120T200 112V200H0Z" fill="${c.g1}"/><path d="M0 150Q60 130 120 148T200 140V200H0Z" fill="${c.g2}"/>
+    <rect x="24" y="96" width="9" height="50" fill="#9a6b45"/><circle cx="28" cy="84" r="24" fill="${leaf}"/><circle cx="16" cy="96" r="14" fill="${leaf}"/><circle cx="42" cy="94" r="14" fill="${leaf}"/>
+    <path d="M140 128v30M154 126v30M168 124v30M182 122v30M134 138H200M134 148H200" stroke="#fff" stroke-width="5" opacity=".9"/>
+    ${[[50, 176, "#ff7aa8"], [84, 184, "#ffd24d"], [150, 180, "#ff7aa8"], [176, 172, "#ffffff"], [20, 178, "#ffd24d"]].map(([x, y, f]) => `<g transform="translate(${x} ${y})"><path d="M0 0v8" stroke="#3f9a5a" stroke-width="2"/><circle cy="-1" r="4" fill="${f}"/><circle cy="-1" r="1.6" fill="#fff6a8"/></g>`).join("")}`;
+  }
+  if (id === "sc_bed") return `${sky}<rect width="200" height="200" fill="${c.bw}"/>
+    ${[...Array(14)].map((_, i) => `<circle cx="${(i * 47) % 190 + 8}" cy="${(i * 31) % 120 + 10}" r="2" fill="#fff" opacity=".35"/>`).join("")}
+    <rect x="118" y="30" width="56" height="62" rx="28" fill="url(#sk)" stroke="#fff" stroke-width="5"/>${sunSVG(ph, 146, 56, 9)}${starsSVG(ph, [[134, 44], [158, 70], [140, 76]])}
+    <rect y="148" width="200" height="52" fill="${night ? "#5a4a6e" : "#d9b48f"}"/><path d="M0 148H200" stroke="rgba(0,0,0,.12)" stroke-width="3"/>
+    <rect x="6" y="104" width="64" height="46" rx="8" fill="#a8734a"/><rect x="8" y="94" width="60" height="30" rx="10" fill="#ffc2d8"/><rect x="12" y="86" width="26" height="14" rx="7" fill="#fff"/><path d="M8 112h60M8 120h60" stroke="#ff9fc0" stroke-width="3"/>
+    <rect x="172" y="120" width="22" height="30" rx="3" fill="#a8734a"/><path d="M183 120V104" stroke="#555" stroke-width="3"/><path d="M174 104h18l-4-16h-10Z" fill="#ffd27a"/>${ph !== "day" ? '<ellipse cx="183" cy="100" rx="40" ry="34" fill="#ffd27a" opacity=".18"/>' : ""}
+    <ellipse cx="100" cy="180" rx="56" ry="12" fill="#b48cff" opacity=".7"/>`;
+  if (id === "sc_beach") return `${sky}<rect width="200" height="200" fill="url(#sk)"/>${sunSVG(ph, 40, 40, 13)}${starsSVG(ph, SP)}${night ? "" : cloudSVG(130, 40, .9)}
+    <rect y="98" width="200" height="50" fill="${c.sea}"/><path d="M0 108q12-6 25 0t25 0 25 0 25 0 25 0 25 0 25 0 25 0M0 124q12-6 25 0t25 0 25 0 25 0 25 0 25 0 25 0 25 0" stroke="#fff" stroke-width="2" fill="none" opacity=".5"/>
+    <path d="M0 142Q100 126 200 142V200H0Z" fill="${c.sand}"/>
+    <path d="M162 176L168 120" stroke="#9a6b45" stroke-width="4"/><path d="M142 124Q166 100 192 124Z" fill="#ff7a8a"/><path d="M154 124Q166 104 168 124M170 124Q172 104 180 122" stroke="#fff" stroke-width="3" fill="none"/>
+    <path d="M26 186q6-12 12 0z" fill="#ffd0e0" stroke="#ff9fc0" stroke-width="1.5"/><circle cx="60" cy="190" r="4" fill="#ffd0e0" stroke="#ff9fc0"/>`;
+  if (id === "sc_city") { const W = ph === "day" ? "#bfe6ff" : "#ffd27a";
+    return `${sky}<rect width="200" height="200" fill="url(#sk)"/>${sunSVG(ph, 150, 40, 12)}${starsSVG(ph, SP)}
+    ${[[0, 96, 34, 80], [30, 76, 28, 100], [56, 104, 30, 70], [130, 88, 26, 90], [154, 70, 24, 110], [176, 98, 26, 80]].map(([x, y, w, h]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${night ? "#2a2850" : ph === "dusk" ? "#7a5a7c" : "#9fb4d0"}"/>${[0, 1, 2].map(r => [0, 1].map(cn => (r + cn + x) % 3 ? `<rect x="${x + 5 + cn * (w / 2 - 2)}" y="${y + 8 + r * 16}" width="7" height="9" fill="${W}" opacity="${ph === "day" ? .5 : 1}"/>` : "").join("")).join("")}`).join("")}
+    <rect y="152" width="200" height="48" fill="${night ? "#3b3558" : "#c7b9a8"}"/><path d="M0 152H200" stroke="rgba(0,0,0,.2)" stroke-width="4"/><path d="M0 164H200M0 184H200" stroke="rgba(0,0,0,.08)" stroke-width="2"/>`; }
+  return `${sky}<rect width="200" height="200" fill="${c.wall}"/>
+    <rect x="52" y="34" width="84" height="76" rx="8" fill="url(#sk)" stroke="#fff" stroke-width="6"/>${sunSVG(ph, 116, 58, 9)}${starsSVG(ph, [[64, 50], [84, 68], [74, 90], [106, 88]])}${night ? "" : cloudSVG(80, 56, .6)}
+    <path d="M94 34v76M52 72h84" stroke="#fff" stroke-width="4"/>
+    <path d="M46 30Q58 70 46 112H34V30Z M142 30Q130 70 142 112H154V30Z" fill="#ff9fc0" opacity=".85"/>
+    <rect x="156" y="52" width="26" height="32" rx="3" fill="#fff" stroke="#e6a8c0" stroke-width="3"/><circle cx="169" cy="72" r="5" fill="#ffc2d8"/><circle cx="163" cy="62" r="2.4" fill="#ffc2d8"/><circle cx="169" cy="59" r="2.4" fill="#ffc2d8"/><circle cx="175" cy="62" r="2.4" fill="#ffc2d8"/>
+    <rect y="150" width="200" height="50" fill="${c.floor}"/><path d="M0 150H200" stroke="rgba(0,0,0,.12)" stroke-width="3"/><path d="M0 168H200M0 186H200M40 150L26 200M100 150V200M160 150L176 200" stroke="rgba(0,0,0,.08)" stroke-width="2"/>
+    <ellipse cx="100" cy="182" rx="72" ry="14" fill="#ff9fc0"/><ellipse cx="100" cy="182" rx="56" ry="9" fill="#ffc2d8"/>
+    <path d="M12 150h18l-3 22h-12z" fill="#e58d6a"/><path d="M21 150Q8 122 14 108M21 150Q34 126 30 106M21 150Q21 120 21 100" stroke="#4fb286" stroke-width="5" fill="none" stroke-linecap="round"/>
+    ${night ? '<ellipse cx="100" cy="150" rx="95" ry="60" fill="#ffd27a" opacity=".1"/>' : ""}`;
+}
 
 /* ---------- Données & règles (inspirées de TamaPoke, en version douce) ---------- */
 const newPet = () => ({ stage: "egg", ci: roll(), name: "", age: 0, f: 80, j: 80, e: 80, h: 100, poo: 0, asleep: false, taps: 0, fav: (Math.random() * 3) | 0, fk: false });
 let G = JSON.parse(localStorage.getItem(KEY) || "null") || { pet: newPet(), dex: [], streak: 0, lastDay: "", last: Date.now(), mute: false };
 const save = () => localStorage.setItem(KEY, JSON.stringify(G));
-G.stars ??= 0; G.own ??= []; G.wear ??= ""; G.touch ??= Date.now(); G.best ??= 0;
+G.stars ??= 0; G.own ??= []; G.wear ??= ""; G.touch ??= Date.now(); G.best ??= 0; G.scene ??= "sc_salon"; G.tg ??= { t: "", c: "", n: "" }; G.notif ??= {}; if (!G.own.includes("sc_salon")) G.own.push("sc_salon");
 const clamp = v => Math.max(0, Math.min(100, v));
 const FOODS = [{ i: "🐟", n: "Poisson", f: 25, j: 0 }, { i: "🥛", n: "Lait", f: 15, j: 5 }, { i: "🍬", n: "Friandise", f: 10, j: 12 }];
 const ITEMS = [
+  { id: "sc_salon", i: "🛋️", n: "Salon", p: 0, t: "scene" }, { id: "sc_garden", i: "🌳", n: "Jardin", p: 40, t: "scene" }, { id: "sc_bed", i: "🛏️", n: "Chambre", p: 60, t: "scene" }, { id: "sc_beach", i: "🏖️", n: "Plage", p: 80, t: "scene" }, { id: "sc_city", i: "🌃", n: "Ville", p: 100, t: "scene" },
   { id: "bow", i: "🎀", n: "Nœud", p: 20, t: "acc" }, { id: "flower", i: "🌸", n: "Fleur", p: 30, t: "acc" },
   { id: "scarf", i: "🧣", n: "Écharpe", p: 40, t: "acc" }, { id: "glasses", i: "🕶️", n: "Lunettes", p: 60, t: "acc" },
   { id: "hat", i: "🎩", n: "Chapeau", p: 80, t: "acc" }, { id: "crown", i: "👑", n: "Couronne", p: 150, t: "acc" },
@@ -228,7 +324,7 @@ const ITEMS = [
 const ACH = [
   ["🍼 Premier chaton", () => G.dex.length >= 1], ["🔥 3 jours", () => G.streak >= 3], ["🔥 7 jours", () => G.streak >= 7],
   ["🐈 Chat adulte", () => G.pet.stage === "cat" || G.fare], ["🎨 5 robes", () => G.dex.length >= 5],
-  ["🌈 Toutes les robes", () => G.dex.length >= COATS.length], ["🧶 Record 20+", () => G.best >= 20], ["🛍️ 3 achats", () => G.own.length >= 3]
+  ["🌈 Toutes les robes", () => G.dex.length >= COATS.length], ["🧶 Record 20+", () => G.best >= 20], ["🛍️ 3 achats", () => G.own.length >= 4]
 ];
 const LVL_EVO = 6, FAREWELL_MIN = 72 * 60;
 const lvl = p => Math.floor(p.age / 60);
@@ -268,7 +364,7 @@ const meow = () => snd([[650, 0], [950, .12], [700, .3]], "triangle", .07, .4);
 const pi = () => snd([[880, 0], [1180, .08]], "sine", .05, .15);
 
 /* ---------- Interface ---------- */
-let tmp = { s: "", until: 0 }, bubT, lastKey = "";
+let tmp = { s: "", until: 0 }, bubT, lastKey = "", bgKey = "";
 const pick = a => a[(Math.random() * a.length) | 0];
 function say(t, ms = 3500) {
   const b = $("#bubble"); b.textContent = t; b.classList.add("on");
@@ -300,7 +396,8 @@ function render() {
   if (key !== lastKey) { $("#cat").innerHTML = p.stage === "egg" ? eggSVG(p.taps) : catSVG(k, mood(), p.stage === "kitten", G.wear); lastKey = key; }
   const svg = $("#cat svg"); if (svg && p.stage !== "egg") svg.dataset.s = mood();
   const h = new Date().getHours();
-  $("#screen").className = p.asleep || h >= 21 || h < 5 ? "night" : (h >= 7 && h < 18 ? "" : "dusk");
+  const ph = p.asleep || h >= 21 || h < 5 ? "night" : (h >= 7 && h < 18 ? "day" : "dusk");
+  if (bgKey !== G.scene + ph) { bgKey = G.scene + ph; $("#bg").innerHTML = sceneSVG(G.scene, ph); }
   $("#nm").textContent = "🐱 " + (p.name || "Œuf");
   $("#lv").textContent = p.stage === "egg" ? "" : `Niv. ${lvl(p)}${G.streak > 1 ? "  🔥" + G.streak : ""}`;
   $("#stars2").textContent = "⭐ " + G.stars;
@@ -349,6 +446,7 @@ const ACTIONS = {
       act(() => { p.j = clamp(p.j + 8 + sc * 3); p.e = clamp(p.e - 10); });
       feel(sc > 8 ? "love" : "happy"); say(`${rec ? "Nouveau record ! " : ""}${sc} pts · +${st} ⭐`, 4000); }, 10000); },
   shop() { shopRender(); $("#shop").hidden = false; },
+  cfg() { $("#tgt").value = G.tg.t; $("#tgc").value = G.tg.c; $("#ntf").value = G.tg.n; $("#cfgm").textContent = ""; $("#cfg").hidden = false; },
   sleep() { const p = G.pet; if (p.stage === "egg") return; act(() => { p.asleep = !p.asleep; });
     say(p.asleep ? "Bonne nuit 🌙" : "Bien dormi ! ☀️"); if (!p.asleep) meow(); },
   bath() { const p = G.pet; if (p.stage === "egg") return; if (p.asleep) return say("Chut, il dort 🌙");
@@ -366,8 +464,9 @@ document.addEventListener("click", e => {
   const it = e.target.closest("[data-it]");
   if (it) { const x = ITEMS.find(v => v.id === it.dataset.it), own = G.own.includes(x.id);
     if (!own) { if (G.stars < x.p) { say("Il te manque des ⭐ — joue avec ton chat !"); return; }
-      G.stars -= x.p; G.own.push(x.id); if (x.t === "acc") G.wear = x.id; snd([[880, 0], [1320, .1], [1760, .2]], "sine", .06, .35); say(`${x.i} ${x.n} acheté !`); }
+      G.stars -= x.p; G.own.push(x.id); if (x.t === "acc") G.wear = x.id; if (x.t === "scene") G.scene = x.id; snd([[880, 0], [1320, .1], [1760, .2]], "sine", .06, .35); say(`${x.i} ${x.n} acheté !`); }
     else if (x.t === "acc") G.wear = G.wear === x.id ? "" : x.id;
+    else if (x.t === "scene") G.scene = x.id;
     save(); lastKey = ""; render(); shopRender(); return; }
   const f = e.target.closest("[data-f]");
   if (f) { const p = G.pet, d = FOODS[+f.dataset.f], fav = +f.dataset.f === p.fav;
@@ -375,7 +474,7 @@ document.addEventListener("click", e => {
     act(() => { p.f = clamp(p.f + d.f + (fav ? 10 : 0)); p.j = clamp(p.j + d.j + (fav ? 10 : 0)); if (fav) p.fk = true; });
     feel("eat", 1800); setTimeout(() => feel(fav ? "love" : "happy", 2000), 1800); pi();
     say(fav ? `❤️ ${d.n}, son préféré !` : "Miam ! 😋"); return; }
-  if (e.target.closest("[data-close]")) { $("#sheet").hidden = true; $("#dex").hidden = true; $("#shop").hidden = true; }
+  if (e.target.closest("[data-close]")) { $("#sheet").hidden = true; $("#dex").hidden = true; $("#shop").hidden = true; $("#cfg").hidden = true; }
   if (e.target.closest("#snd")) { G.mute = !G.mute; save(); render(); }
   if (e.target.closest("#nm") && G.pet.stage !== "egg") { const n = prompt("Nouveau nom ?", G.pet.name); if (n) { G.pet.name = n.slice(0, 14); save(); render(); } }
   if (e.target.closest("#poos span")) { act(() => { G.pet.poo = Math.max(0, G.pet.poo - 1); G.pet.h = clamp(G.pet.h + 10); }); pi(); }
@@ -391,8 +490,8 @@ $("#cat").addEventListener("pointerdown", e => { // caresse (ou tape sur l’œu
 
 function shopRender() {
   $("#shs").textContent = "⭐ " + G.stars;
-  $("#shopg").innerHTML = ITEMS.map(x => { const own = G.own.includes(x.id), on = x.t === "acc" && G.wear === x.id;
-    return `<button class="opt${on ? " on" : ""}" data-it="${x.id}"><b>${x.i}</b>${x.n}<br>${own ? (x.t === "acc" ? (on ? "Retirer" : "Porter") : "✓") : "⭐ " + x.p}</button>`; }).join("");
+  $("#shopg").innerHTML = ITEMS.map(x => { const own = G.own.includes(x.id), on = (x.t === "acc" && G.wear === x.id) || (x.t === "scene" && G.scene === x.id);
+    return `<button class="opt${on ? " on" : ""}" data-it="${x.id}"><b>${x.i}</b>${x.n}<br>${own ? (x.t === "acc" ? (on ? "Retirer" : "Porter") : x.t === "scene" ? (on ? "Actuel" : "Choisir") : "✓") : "⭐ " + x.p}</button>`; }).join("");
 }
 /* ---------- Brosse (glisser sur le chat), regard qui suit le doigt ---------- */
 let bx = null, bd = 0;
@@ -417,6 +516,30 @@ function butterfly() {
 }
 setInterval(() => { if (Math.random() < .35) butterfly(); }, 40000);
 
+/* ---------- Alertes sur ton téléphone (Telegram / ntfy) ---------- */
+const cm = t => { $("#cfgm").textContent = t; };
+function notify(text) {
+  const { t, c, n } = G.tg;
+  if (t && c) fetch(`https://api.telegram.org/bot${t}/sendMessage`, { method: "POST", body: new URLSearchParams({ chat_id: c, text }) }).catch(() => {});
+  if (n) fetch("https://ntfy.sh/" + encodeURIComponent(n), { method: "POST", body: text }).catch(() => {});
+}
+function urgent() { // max 1 message par besoin et par heure, jamais la nuit
+  const p = G.pet, h = new Date().getHours();
+  if (p.asleep || p.stage === "egg" || h >= 22 || h < 8) return;
+  for (const [k, m] of [["f", "a faim 🐟"], ["h", "est tout sale 🫧"], ["j", "s’ennuie 🧶"], ["e", "est épuisé ⚡"]])
+    if (p[k] < 20 && Date.now() - (G.notif[k] || 0) > 3600000) { G.notif[k] = Date.now(); save(); notify(`🐱 ${p.name} ${m}`); break; }
+}
+[["#tgt", "t"], ["#tgc", "c"], ["#ntf", "n"]].forEach(([id, k]) => $(id).addEventListener("input", e => { G.tg[k] = e.target.value.trim(); save(); }));
+$("#tgs").onclick = () => { notify("🐱 Test Neko : ça marche ! 💕"); cm("Test envoyé. Regarde ton autre téléphone 📱"); };
+$("#tgd").onclick = () => {
+  if (!G.tg.t) return cm("Colle d’abord le token du bot.");
+  fetch(`https://api.telegram.org/bot${G.tg.t}/getUpdates`).then(r => r.json()).then(j => {
+    const m = (j.result || []).reverse().find(u => u.message);
+    if (m) { G.tg.c = String(m.message.chat.id); $("#tgc").value = G.tg.c; save(); cm("Chat id trouvé ✅"); }
+    else cm("Aucun message reçu : écris « coucou » à ton bot sur Telegram, puis réessaie.");
+  }).catch(() => cm("Token invalide ou pas de réseau."));
+};
+
 /* ---------- Vie : clignements, besoins, écran allumé ---------- */
 setInterval(() => { if (!G.pet.asleep && G.pet.stage !== "egg") { document.body.classList.add("blink"); setTimeout(() => document.body.classList.remove("blink"), 140); } }, 4200);
 setInterval(() => {
@@ -432,6 +555,7 @@ setInterval(() => {
   const p = G.pet; if (p.asleep || p.stage === "egg") return;
   const need = p.f < 30 ? "J’ai faim… 🐟" : p.h < 30 ? "Je suis tout sale… 🫧" : p.j < 30 ? "Joue avec moi ! 🧶" : p.e < 30 ? "J’ai sommeil… 🌙" : "";
   if (need) { say(need); meow(); }
+  urgent();
 }, 60000);
 const wake = () => { if ("wakeLock" in navigator) navigator.wakeLock.request("screen").catch(() => {}); };
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { advance(); render(); wake(); } });
