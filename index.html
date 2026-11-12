@@ -3,158 +3,117 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
-<meta name="theme-color" content="#ffb3cf">
+<meta name="theme-color" content="#0f380f">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <title>Neko</title>
 <style>
+:root{--d:#0f380f;--m:#306230;--l:#8bac0f;--x:#9bbc0f;--c:polygon(4px 0,calc(100% - 4px) 0,calc(100% - 4px) 4px,100% 4px,100% calc(100% - 4px),calc(100% - 4px) calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,4px calc(100% - 4px),0 calc(100% - 4px),0 4px,4px 4px)}
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
 html,body{height:100%}
-body{display:flex;flex-direction:column;align-items:center;overflow:hidden;touch-action:manipulation;background:#ffe9f1;color:#7a3b5a;font-family:ui-rounded,"Nunito",system-ui,sans-serif;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+body{display:flex;flex-direction:column;align-items:center;overflow:hidden;touch-action:manipulation;background:var(--x);color:var(--d);font:400 .62rem/1.5 "Press Start 2P",ui-monospace,Menlo,monospace;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
 button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
-#top{width:100%;display:flex;justify-content:space-between;align-items:center;padding:10px 16px;font-weight:800;font-size:1.05rem}
+svg{shape-rendering:crispEdges}
+#top{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;font-size:.58rem}
+#top button{font-size:1rem}
 #stage{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;position:relative}
-#screen{width:min(90vw,50vh);aspect-ratio:1;border-radius:50%;overflow:hidden;position:relative;border:7px solid #fff;box-shadow:0 8px 30px #d6487f33;background:linear-gradient(#cfeeff,#fff1f6);transition:background 1.2s}
-#screen.dusk{background:linear-gradient(#ffb48a,#ffe3d0)}
-#screen.night{background:linear-gradient(#2b2a4a,#4a3f73)}
-#screen::after{content:"";position:absolute;left:-10%;right:-10%;bottom:-18%;height:38%;background:#f7c6d8;border-radius:50%}
-#stars{position:absolute;top:8%;left:0;right:0;text-align:center;letter-spacing:.6em;color:#fff;opacity:0;transition:opacity 1s}
-.night #stars{opacity:.8}
+#screen{width:min(92vw,52vh);aspect-ratio:1;position:relative;overflow:hidden;border:6px solid var(--d);box-shadow:0 0 0 4px var(--m),0 8px 0 4px var(--d);background:var(--l)}
+#bg{position:absolute;inset:0;width:100%;height:100%}
 #cat{position:absolute;inset:0;z-index:1}
 #cat svg{width:100%;height:100%}
-#bubble{position:absolute;top:2%;left:50%;transform:translate(-50%,-8px);background:#fff;padding:9px 16px;border-radius:20px;box-shadow:0 4px 16px #d6487f33;font-weight:700;opacity:0;transition:.3s;pointer-events:none;max-width:86vw;text-align:center;z-index:6}
+#run{display:none}
+#bubble{position:absolute;top:3%;left:50%;transform:translate(-50%,-6px);background:#e0f8d0;border:3px solid var(--d);padding:8px 10px;font-size:.5rem;opacity:0;pointer-events:none;max-width:88%;text-align:center;z-index:6}
 #bubble.on{opacity:1;transform:translate(-50%,0)}
-#stats{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;width:min(90vw,420px);padding:6px 0}
-.st{display:flex;align-items:center;gap:6px;font-size:1.1rem}
-.bar{flex:1;height:10px;background:#fff;border-radius:6px;overflow:hidden}
-.bar i{display:block;height:100%;background:#ff7aa8;transition:width .5s,background .5s}
-.bar i.low{background:#ff5a5a}
+#stats{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;width:min(90vw,420px);padding:8px 0}
+.st{display:flex;align-items:center;gap:6px;font-size:1rem}
+.bar{flex:1;height:12px;background:var(--x);border:3px solid var(--d)}
+.bar i{display:block;height:100%;background:var(--d)}
+.bar i.low{background:#c0392b;animation:bl .6s steps(1) infinite}
+@keyframes bl{50%{opacity:.3}}
 #special{min-height:46px;display:flex;align-items:center}
-#special button{background:#ff7aa8;color:#fff;padding:10px 20px;border-radius:24px;font-weight:800;box-shadow:0 4px 14px #d6487f55}
-#bar{display:flex;gap:8px;width:min(94vw,460px);padding:6px 0 14px}
-#bar button{flex:1;background:#fff;border-radius:18px;padding:10px 0;font-size:.75rem;font-weight:800;box-shadow:0 3px 10px #d6487f22;display:flex;flex-direction:column;align-items:center;gap:2px}
-#bar button b{font-size:1.6rem;font-weight:400}
-#bar button:active{transform:scale(.94)}
-.ov{position:fixed;inset:0;z-index:20;background:#ffe9f1f2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;text-align:center}
+#special button,#bar button,.ov .opt{background:var(--l);border:3px solid var(--d);box-shadow:0 4px 0 var(--m);font-size:.55rem;padding:10px 14px}
+#special button:active,#bar button:active,.ov .opt:active{transform:translateY(3px);box-shadow:none}
+#bar{display:flex;gap:6px;width:min(94vw,460px);padding:6px 0 14px}
+#bar button{flex:1;padding:8px 0;font-size:.45rem;display:flex;flex-direction:column;align-items:center;gap:4px}
+#bar button b{font-size:1.4rem;font-weight:400}
+.ov{position:fixed;inset:0;z-index:20;background:var(--x);display:flex;flex-direction:column;align-items:center;justify-content:safe center;gap:14px;padding:20px;text-align:center;overflow-y:auto}
 .ov[hidden]{display:none}
-.ov .row{display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
-.ov .opt{background:#fff;border-radius:20px;padding:14px 18px;font-weight:800;box-shadow:0 4px 14px #d6487f22;min-width:96px}
-.ov .opt b{display:block;font-size:2rem;font-weight:400}
-#dexg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:min(92vw,420px)}
-#dexg div{background:#fff;border-radius:16px;padding:4px;font-size:.75rem;font-weight:800}
-#dexg .lock svg{filter:brightness(0);opacity:.2}
-#ball{position:absolute;font-size:3.4rem;transition:left .25s,top .25s}
-.p{position:fixed;font-size:26px;pointer-events:none;animation:rise 1.4s ease-out forwards;z-index:30}
-@keyframes rise{to{transform:translate(var(--dx),-120px) scale(1.3);opacity:0}}
-
-/* chat */
-.l{opacity:0;transition:opacity .18s}
-.e-open{transform-box:fill-box;transform-origin:center;transition:transform .15s,opacity .18s}
-.e-happy,.e-sleep{fill:none;stroke:#2d2236;stroke-width:5;stroke-linecap:round}
-.e-heart{fill:#ff5c8a}
-.m{fill:none;stroke:#2d2236;stroke-width:3.5;stroke-linecap:round;stroke-linejoin:round}
-.wh{stroke:#5a3c5a77;stroke-width:2.5;stroke-linecap:round}
-.blush{fill:#ff8fb3;opacity:.5}
-.cg{transform-origin:100px 190px}
-.cg.kit{transform:scale(.78)}
-.tail{transform-origin:150px 165px;animation:sway 2.5s ease-in-out infinite}
-@keyframes sway{50%{transform:rotate(12deg)}}
-.cat{animation:fl 4s ease-in-out infinite}
-.cat[data-s=sleep]{animation-duration:7s}
-@keyframes fl{50%{transform:translateY(-4px)}}
-.cat[data-s=egg] .egg{transform-origin:100px 180px;animation:wob 2s ease-in-out infinite}
-@keyframes wob{0%,80%,100%{transform:rotate(0)}85%{transform:rotate(-6deg)}92%{transform:rotate(6deg)}}
+.ov h2{font-size:.75rem;line-height:1.6}
+.ov .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.ov .opt b{display:block;font-size:1.6rem;font-weight:400}
+#dexg,#shopg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(92vw,420px)}
+#dexg div{background:var(--l);border:3px solid var(--d);padding:4px;font-size:.45rem}
+#dexg .lock svg{filter:brightness(0);opacity:.25}
+#shopg .opt{min-width:0;padding:8px 2px;font-size:.45rem}
+#shopg .opt.on{outline:3px solid var(--d)}
+#ach{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:min(92vw,420px);font-size:.45rem}
+#ach span{border:2px solid var(--d);padding:3px 5px;opacity:.35}
+#ach span.ok{opacity:1;background:var(--l)}
+input{user-select:text;-webkit-user-select:text;width:min(92vw,360px);padding:10px;border:3px solid var(--d);font:inherit;font-size:.5rem;color:var(--d);background:#e0f8d0}
+#cfg p{font-size:.45rem;max-width:360px;line-height:1.8}
+#ball{position:absolute;font-size:3rem}
+.p{position:fixed;font-size:22px;pointer-events:none;animation:rise 1.4s steps(7) forwards;z-index:30}
+@keyframes rise{to{transform:translate(var(--dx),-120px);opacity:0}}
+.bf{position:absolute;left:-12%;font-size:2rem;z-index:3;animation:fly 7s steps(28) forwards}
+@keyframes fly{0%{left:-12%;transform:translateY(0)}50%{transform:translateY(10px)}100%{left:105%;transform:translateY(0)}}
+#deco{position:absolute;left:14%;bottom:9%;z-index:2;font-size:1.5rem;display:flex;gap:2px}
+#bowl{position:absolute;left:4%;bottom:4%;width:20%;z-index:1;transition:opacity .4s}
+#litter{position:absolute;right:3%;bottom:4%;width:27%;z-index:3;cursor:pointer;transition:opacity .4s}
+#bowl svg,#litter svg{width:100%;display:block}
+#food{position:absolute;left:4%;bottom:13%;width:20%;text-align:center;font-size:1.3rem;z-index:1;opacity:0}
+#food.on{opacity:1}
+#toy{position:absolute;bottom:7%;font-size:1.6rem;z-index:2;opacity:0;transition:left 1s steps(8)}
+#toy.on{opacity:1}
+#toy.roll{animation:rl .5s steps(4) infinite}
+@keyframes rl{to{transform:rotate(360deg)}}
+#poos{position:absolute;left:50%;top:-12%;transform:translateX(-50%);display:flex;font-size:1.1rem;pointer-events:none}
+.fly{display:none;position:absolute;left:20%;top:-30%;font-size:.9rem;pointer-events:none}
+.dirty .fly{display:block;animation:circ 1.6s steps(4) infinite}
+@keyframes circ{25%{transform:translate(24px,-8px)}50%{transform:translate(40px,6px)}75%{transform:translate(14px,12px)}}
+#litter.busy svg,#litter.scoop svg{animation:shk .25s steps(1) infinite}
+#litter.scoop svg{animation-iteration-count:4}
+#litter.busy::after{content:"💭";position:absolute;left:30%;top:-55%;font-size:1.2rem}
+@keyframes shk{25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+#screen.running #bowl,#screen.running #litter{opacity:0}
+/* chat pixel */
+.l{opacity:0}
+.blush{opacity:.45}
+.cat{animation:fl 1.6s steps(1) infinite}
+.cat[data-s=sleep]{animation-duration:3.2s}
+@keyframes fl{0%{transform:none}50%{transform:translateY(-2%)}}
+.cat[data-s=egg] .egg{animation:wob 2s steps(1) infinite}
+@keyframes wob{0%,80%,100%{transform:none}85%{transform:translateX(-1px)}92%{transform:translateX(1px)}}
 .cat[data-s=idle] .e-open,.cat[data-s=sad] .e-open,.cat[data-s=eat] .e-open{opacity:1}
-.cat[data-s=happy] .e-happy,.cat[data-s=eat] .e-happy{opacity:0}
-.cat[data-s=happy] .e-happy{opacity:1}
+.cat[data-s=happy] .e-happy,.cat[data-s=blep] .e-happy,.cat[data-s=groom] .e-happy,.cat[data-s=stretch] .e-happy{opacity:1}
 .cat[data-s=love] .e-heart{opacity:1}
 .cat[data-s=sleep] .e-sleep{opacity:1}
-.cat[data-s=sad] .tear{opacity:1}
-.cat[data-s=idle] .m-s,.cat[data-s=happy] .m-s,.cat[data-s=love] .m-s,.cat[data-s=sleep] .m-s{opacity:1}
-.cat[data-s=sad] .m-f{opacity:1}
-.cat[data-s=eat] .m-o{opacity:1}
-.cat[data-s=happy] .blush,.cat[data-s=love] .blush{opacity:.9}
-.tear{fill:#7cc8ff}
-.m-o{fill:#c2455f}
-body.blink .cat .e-open{transform:scaleY(.08)}
-.zzz{opacity:0;fill:#8f78c9;font:700 22px sans-serif}
-.cat[data-s=sleep] .zzz{animation:zz 3s ease-in infinite}
-@keyframes zz{0%{opacity:0;transform:translateY(14px)}30%{opacity:1}100%{opacity:0;transform:translateY(-24px)}}
-.ov{overflow-y:auto;justify-content:safe center}
-#top{gap:8px}
-#top button{font-weight:800}
-#deco{position:absolute;left:14%;bottom:9%;z-index:2;font-size:1.7rem;display:flex;gap:2px}
-.bf{position:absolute;left:-12%;font-size:2.2rem;z-index:3;animation:fly 7s linear forwards}
-@keyframes fly{0%{left:-12%;transform:translateY(0)}25%{transform:translateY(-18px)}50%{transform:translateY(10px)}75%{transform:translateY(-14px)}100%{left:105%;transform:translateY(0)}}
-#shopg{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:min(92vw,420px)}
-#shopg .opt{min-width:0;padding:10px 4px;font-size:.78rem}
-#shopg .opt.on{outline:3px solid #ff7aa8}
-#ach{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:min(92vw,420px);font-size:.75rem;font-weight:800}
-#ach span{background:#fff;border-radius:12px;padding:4px 8px;opacity:.35}
-#ach span.ok{opacity:1}
-.eyes{transition:transform .3s}
-.tongue{fill:#ff7a9c}
-.cat[data-s=blep] .e-happy,.cat[data-s=blep] .m-s,.cat[data-s=blep] .tongue{opacity:1}
-#bg{position:absolute;inset:0;width:100%;height:100%}
-#screen::after{display:none}
-.cloud{animation:drift 24s ease-in-out infinite alternate}
-@keyframes drift{to{transform:translateX(26px)}}
-input{user-select:text;-webkit-user-select:text;width:min(92vw,360px);padding:10px 12px;border-radius:12px;border:2px solid #ffb3cf;font:inherit;color:#7a3b5a;background:#fff}
-#cfg p{font-size:.8rem;max-width:360px;line-height:1.4}
-#screen{border-radius:14%;width:min(92vw,52vh)}
-#cat{will-change:transform}
-#run{position:absolute;inset:0;z-index:1;opacity:0;transition:opacity .5s;pointer-events:none;overflow:hidden}
-#run.on{opacity:1}
-#run.night{filter:brightness(.5)}
-#run.dusk{filter:sepia(.35) saturate(1.2)}
-.lay{position:absolute;left:0;width:200%;background-repeat:repeat-x;background-size:50% 100%;animation:scr linear infinite}
-.far{bottom:24%;height:40%;animation-duration:9s}
-.near{bottom:0;height:32%;animation-duration:2s}
-@keyframes scr{to{transform:translateX(-50%)}}
-#bowl{position:absolute;left:4%;bottom:4%;width:20%;z-index:1;transition:opacity .4s}
-#bowl svg,#litter svg{width:100%;display:block}
-#food{position:absolute;left:4%;bottom:13%;width:20%;text-align:center;font-size:1.4rem;z-index:1;opacity:0;transition:opacity .3s}
-#food.on{opacity:1}
-#toy{position:absolute;bottom:7%;font-size:1.8rem;z-index:2;opacity:0;transition:left 1s ease-out,opacity .3s}
-#toy.on{opacity:1}
-#toy.roll{animation:rl .5s linear infinite}
-@keyframes rl{to{transform:rotate(360deg)}}
-#litter{position:absolute;right:3%;bottom:4%;width:27%;z-index:3;cursor:pointer;transition:opacity .4s}
-#poos{position:absolute;left:50%;top:-12%;transform:translateX(-50%);display:flex;font-size:1.25rem;pointer-events:none}
-.fly{display:none;position:absolute;left:20%;top:-30%;font-size:1rem;pointer-events:none}
-.dirty .fly{display:block;animation:circ 1.6s linear infinite}
-@keyframes circ{25%{transform:translate(26px,-8px)}50%{transform:translate(40px,6px)}75%{transform:translate(14px,12px)}}
-#litter.busy svg,#litter.scoop svg{animation:shk .25s linear infinite}
-#litter.scoop svg{animation-iteration-count:4}
-#litter.busy::after{content:"💭";position:absolute;left:30%;top:-55%;font-size:1.3rem}
-@keyframes shk{25%{transform:translateX(-2px) rotate(-1deg)}75%{transform:translateX(2px) rotate(1deg)}}
-#screen.running #bowl,#screen.running #litter{opacity:0}
-/* chat de face : toilette, étirement */
-.paw{transform-box:fill-box}
-.cat[data-s=groom] .paw{opacity:1;animation:lick .45s ease-in-out infinite alternate}
-@keyframes lick{from{transform:translate(0,6px)}to{transform:translate(12px,-16px)}}
-.cat[data-s=groom] .e-happy,.cat[data-s=groom] .m-s,.cat[data-s=groom] .tongue{opacity:1}
-.cat[data-s=stretch]{animation:str 1.8s ease-in-out;transform-origin:50% 96%}
-@keyframes str{0%,100%{transform:scale(1,1)}40%,60%{transform:scale(1.14,.82)}}
-.cat[data-s=stretch] .e-happy,.cat[data-s=stretch] .m-s{opacity:1}
-/* chat de profil : marche, course, saut */
+.cat[data-s=sad] .tear,.cat[data-s=sad] .m-f,.cat[data-s=eat] .m-o{opacity:1}
+.cat:is([data-s=idle],[data-s=happy],[data-s=love],[data-s=sleep],[data-s=blep],[data-s=groom],[data-s=stretch]) .m-s{opacity:1}
+.cat:is([data-s=blep],[data-s=groom]) .tongue{opacity:1}
+.cat:is([data-s=happy],[data-s=love]) .blush{opacity:1}
+body.blink .cat .e-open{visibility:hidden}
+.zzz{opacity:0;fill:var(--m);font-family:"Press Start 2P",monospace}
+.cat[data-s=sleep] .zzz{animation:zz 3s steps(4) infinite}
+@keyframes zz{0%{opacity:0;transform:translateY(3px)}30%{opacity:1}100%{opacity:0;transform:translateY(-4px)}}
+.cat[data-s=groom] .paw{opacity:1;animation:lick .45s steps(1) infinite alternate}
+@keyframes lick{from{transform:translate(0,2px)}to{transform:translate(3px,-3px)}}
+.cat[data-s=stretch]{animation:str 1.8s steps(1);transform-origin:50% 96%}
+@keyframes str{0%,100%{transform:none}30%,70%{transform:scale(1.1,.86)}}
 .sd{animation:none!important}
-.sd .flip{transform-origin:100px 100px}
-.sd .e-open,.sd .m-s{opacity:1}
-.sd[data-s=walk] .la,.sd[data-s=run] .la{animation:lg .7s ease-in-out infinite alternate}
-.sd[data-s=walk] .lb,.sd[data-s=run] .lb{animation:lg .7s ease-in-out infinite alternate-reverse}
+.sd[data-s=walk] .la,.sd[data-s=run] .la{animation:lg .7s steps(1) infinite alternate}
+.sd[data-s=walk] .lb,.sd[data-s=run] .lb{animation:lg .7s steps(1) infinite alternate-reverse}
 .sd[data-s=run] .la,.sd[data-s=run] .lb{animation-duration:.26s}
-@keyframes lg{from{transform:rotate(-30deg)}to{transform:rotate(30deg)}}
-.sd[data-s=walk] .bd{animation:bob .35s ease-in-out infinite}
-.sd[data-s=run] .bd{animation:bob .26s ease-in-out infinite}
-@keyframes bob{50%{transform:translateY(-3px)}}
-.sd .tail2{transform-origin:56px 126px;animation:sway 2.5s ease-in-out infinite}
-.sd[data-s=run] .tail2{animation:none;transform:rotate(-24deg)}
-.sd .headg{transform-origin:126px 116px}
-.sd[data-s=eatside] .headg{animation:chew .45s ease-in-out infinite alternate}
-@keyframes chew{from{transform:rotate(20deg)}to{transform:rotate(32deg)}}
-.sd[data-s=pounce] .bd{animation:hop .5s ease-out 2}
-@keyframes hop{50%{transform:translateY(-24px)}}
+@keyframes lg{from{transform:translateX(-2px)}to{transform:translateX(2px)}}
+.sd[data-s=walk] .bd{animation:bob .35s steps(1) infinite}
+.sd[data-s=run] .bd{animation:bob .26s steps(1) infinite}
+@keyframes bob{50%{transform:translateY(-1px)}}
+.sd .tail2{animation:tl 1.2s steps(1) infinite}
+@keyframes tl{50%{transform:translateY(-1px)}}
+.sd[data-s=eatside] .headg{animation:chew .45s steps(1) infinite alternate}
+@keyframes chew{from{transform:translateY(0)}to{transform:translateY(2px)}}
+.sd[data-s=pounce] .bd{animation:hop .5s steps(1) 2}
+@keyframes hop{50%{transform:translateY(-4px)}}
 </style>
 </head>
 <body>
@@ -237,117 +196,101 @@ function roll() {
   return 0;
 }
 
-function acc(w) {
-  return ({
-    bow: '<g transform="translate(140 46)"><path d="M0 0L-17-11V11ZM0 0L17-11V11Z" fill="#ff6fa0"/><circle r="5" fill="#ff3d7f"/></g>',
-    flower: '<g transform="translate(62 44)">' + [0, 72, 144, 216, 288].map(a => `<circle cx="${Math.round(9 * Math.cos(a * Math.PI / 180))}" cy="${Math.round(9 * Math.sin(a * Math.PI / 180))}" r="6" fill="#ffc2dc"/>`).join("") + '<circle r="5" fill="#ffd24d"/></g>',
-    crown: '<path d="M66 42L72 14L88 32L100 10L112 32L128 14L134 42Z" fill="#ffd24d" stroke="#e0a800" stroke-width="3" stroke-linejoin="round"/>',
-    hat: '<rect x="72" y="4" width="56" height="38" rx="6" fill="#2d2236"/><rect x="72" y="28" width="56" height="9" fill="#ff6fa0"/><ellipse cx="100" cy="44" rx="42" ry="8" fill="#2d2236"/>',
-    glasses: '<rect x="54" y="80" width="36" height="28" rx="12" fill="#1f1a2b" opacity=".92"/><rect x="110" y="80" width="36" height="28" rx="12" fill="#1f1a2b" opacity=".92"/><path d="M90 92H110" stroke="#1f1a2b" stroke-width="4"/><path d="M60 86h10M116 86h10" stroke="#fff" stroke-width="3" opacity=".6"/>',
-    scarf: '<path d="M52 136Q100 160 148 136L152 154Q100 178 48 154Z" fill="#ff6f6f"/><rect x="124" y="150" width="16" height="36" rx="6" fill="#ff6f6f"/><path d="M124 166H140M124 176H140" stroke="#fff" stroke-width="3" opacity=".6"/>'
-  })[w] || "";
+function acc(w, sc) {
+  const a = {
+    bow: [[R(26,3,30,8),"#ff6fa0"],[R(30,5,32,6),"#ff3d7f"],[R(32,3,36,8),"#ff6fa0"]],
+    flower: [[R(9,4,14,9),"#ffc2dc"],[R(10,5,13,8),"#ffd24d"]],
+    crown: [[R(13,4,27,8),"#ffd24d"],[R(13,2,15,4),"#ffd24d"],[R(19,1,21,4),"#ffd24d"],[R(25,2,27,4),"#ffd24d"]],
+    hat: [[R(14,0,26,7),"#2d2236"],[R(14,5,26,6),"#ff6fa0"],[R(11,7,29,8),"#2d2236"]],
+    glasses: [[R(8,13,18,19),"#1f1a2b"],[R(22,13,32,19),"#1f1a2b"],[R(18,15,22,16),"#1f1a2b"],[R(9,14,12,15),"#8a7ab0"],[R(23,14,26,15),"#8a7ab0"]],
+    scarf: [[R(9,24,31,28),"#ff6f6f"],[R(26,28,30,36),"#ff6f6f"],[R(26,31,30,32),"#fff"]]
+  }[w];
+  return a ? px(a, sc, 1) : "";
 }
-let CID = 0;
-const sh = (hex, a) => { const n = parseInt(hex.slice(1), 16), t = a < 0 ? 0 : 255, q = Math.abs(a);
-  const f = v => Math.round(v + (t - v) * q);
+/* ---------- Pixel art (style Game Boy Color) ---------- */
+const OUT = "#1a1424";
+const sh = (hex, a) => { const n = parseInt(hex.slice(1), 16), t = a < 0 ? 0 : 255, q = Math.abs(a), f = v => Math.round(v + (t - v) * q);
   return "#" + ((1 << 24) + (f(n >> 16) << 16) + (f((n >> 8) & 255) << 8) + f(n & 255)).toString(16).slice(1); };
-const IRIS = { Roux: "#e8a53a", Gris: "#6dbb8a", Noir: "#ffd24d", Blanc: "#6fb7ff", Calico: "#d9a441", Lavande: "#b57bff", "Étoilé ✨": "#ff9ad5", Siamois: "#5ab0ff", Smoking: "#7fe0a0", Menthe: "#3fbf9b", Bonbon: "#ff7aa8" };
+const E = (cx, cy, rx, ry) => (x, y) => ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1;
+const R = (a, b, c, d) => (x, y) => x >= a && x < c && y >= b && y < d;
+const P = p => (x, y) => { let o = false; for (let i = 0, j = p.length - 1; i < p.length; j = i++) if ((p[i][1] > y) !== (p[j][1] > y) && x < (p[j][0] - p[i][0]) * (y - p[i][1]) / (p[j][1] - p[i][1]) + p[i][0]) o = !o; return o; };
+const MR = (a, b, c, d, col) => [[R(a, b, c, d), col], [R(40 - c, b, 40 - a, d), col]];
+function px(shapes, sc = 1, ol = 0, W = 40, H = 40) {
+  const g = new Array(W * H).fill(null);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const ox = W / 2 + (x + .5 - W / 2) / sc, oy = H + (y + .5 - H) / sc;
+    for (const [t, c] of shapes) if (t(ox, oy)) g[y * W + x] = c;
+  }
+  if (ol) { const f = g.slice();
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (!g[y * W + x] && [[1,0],[-1,0],[0,1],[0,-1]].some(([a, b]) => x + a >= 0 && x + a < W && y + b >= 0 && y + b < H && g[(y + b) * W + x + a])) f[y * W + x] = OUT;
+    for (let i = 0; i < f.length; i++) g[i] = f[i]; }
+  let s = "";
+  for (let y = 0; y < H; y++) { let x = 0; while (x < W) { const c = g[y * W + x]; if (!c) { x++; continue; } let n = 1; while (x + n < W && g[y * W + x + n] === c) n++; s += `<rect x="${x}" y="${y}" width="${n}" height="1" fill="${c}"/>`; x += n; } }
+  return s;
+}
+const GL = (cls, s, sc = 1, ol = 0) => `<g class="${cls}">${px(s, sc, ol)}</g>`;
 
 function catSVG(k, st, kit, wear) {
-  const u = "g" + (++CID), c = k.c, ol = sh(c, -.4), ir = IRIS[k.n] || "#6b4a9e", pt = k.pt || c;
-  const lc = (k.n === "Noir" || k.n === "Smoking") ? "#ffe9a8" : "#2d2236", mc = k.n === "Noir" ? "#ffe9a8" : "#2d2236";
-  const D = "M150 165C196 160 196 104 168 98";
-  const eye = (x, m) => `<g transform="translate(${x} 94)">
-    <g class="l e-open"><ellipse rx="12" ry="14.5" fill="url(#${u}i)"/><ellipse rx="6" ry="10" fill="#1f1530"/><ellipse cx="-4" cy="-6" rx="4.6" ry="5" fill="#fff"/><circle cx="4" cy="6" r="2.4" fill="#fff"/>
-      <path d="M-12-4Q0-19 12-4" fill="none" stroke="#1f1530" stroke-width="3.5" stroke-linecap="round"/><path d="${m ? "M12-4l5-4" : "M-12-4l-5-4"}" stroke="#1f1530" stroke-width="3" stroke-linecap="round"/></g>
-    <path class="l e-happy" style="stroke:${lc}" d="M-10 4Q0-12 10 4"/><path class="l e-sleep" style="stroke:${lc}" d="M-10 0Q0 9 10 0"/>
-    <path class="l e-heart" d="M0 11C-18-2-14-16-5-14-2-13 0-10 0-8 0-10 2-13 5-14 14-16 18-2 0 11Z"/>
-    <ellipse class="l tear" cx="${m ? 8 : -8}" cy="24" rx="3" ry="5"/></g>`;
-  const marks = k.t === "stripe"
-    ? `<path d="M100 44v14M85 47l3 12M115 47l-3 12M54 150q10 4 14 18M146 150q-10 4-14 18M46 92l14 3M46 101l14-1M154 92l-14 3M154 101l-14-1" stroke="${k.s}" stroke-width="4.5" stroke-linecap="round" fill="none"/>`
-    : k.t === "patch"
-    ? `<ellipse cx="72" cy="66" rx="19" ry="13" fill="${k.s}"/><ellipse cx="138" cy="70" rx="15" ry="12" fill="${k.s2}"/><ellipse cx="142" cy="160" rx="20" ry="22" fill="${k.s}"/>`
-    : k.t === "points" ? `<ellipse cx="100" cy="108" rx="34" ry="30" fill="${k.s}" opacity=".4"/>`
-    : k.t === "tux" ? `<path d="M100 42Q88 70 84 112H116Q112 70 100 42Z" fill="#fff"/>` : "";
-  const paw = x => `<ellipse cx="${x}" cy="188" rx="16" ry="9" fill="${k.pt || sh(k.b, -.03)}" stroke="${ol}" stroke-width="2.5"/><path d="M${x - 7} 186v5M${x} 187v5M${x + 7} 186v5" stroke="${ol}" stroke-width="2" opacity=".5" stroke-linecap="round"/>`;
-  return `<svg class="cat" data-s="${st}" viewBox="0 0 200 200"><defs>
-    <radialGradient id="${u}b" cx=".4" cy=".25" r=".9"><stop offset="0" stop-color="${sh(c, .3)}"/><stop offset=".6" stop-color="${c}"/><stop offset="1" stop-color="${sh(c, -.2)}"/></radialGradient>
-    <radialGradient id="${u}t" cx=".5" cy=".3" r=".8"><stop offset="0" stop-color="${sh(k.b, .4)}"/><stop offset="1" stop-color="${sh(k.b, -.12)}"/></radialGradient>
-    <radialGradient id="${u}i" cx=".5" cy=".7" r=".75"><stop offset="0" stop-color="${sh(ir, .4)}"/><stop offset="1" stop-color="${sh(ir, -.3)}"/></radialGradient></defs>
-  <g class="cg${kit ? " kit" : ""}">
-    <ellipse cx="100" cy="194" rx="62" ry="7" fill="#000" opacity=".14"/>
-    <g class="tail"><path d="${D}" fill="none" stroke="${ol}" stroke-width="21" stroke-linecap="round"/><path d="${D}" fill="none" stroke="${pt}" stroke-width="17" stroke-linecap="round"/>${k.t === "stripe" ? `<path d="${D}" fill="none" stroke="${k.s}" stroke-width="17" stroke-dasharray="5 11" opacity=".7"/>` : ""}</g>
-    <ellipse cx="100" cy="152" rx="52" ry="40" fill="url(#${u}b)" stroke="${ol}" stroke-width="3"/>
-    <ellipse cx="100" cy="162" rx="30" ry="24" fill="url(#${u}t)"/>
-    <path d="M86 138q4 8 8 0M96 136q4 9 8 0M106 138q4 8 8 0" fill="none" stroke="${sh(k.b, -.25)}" stroke-width="2" stroke-linecap="round"/>
-    <rect x="66" y="158" width="26" height="30" rx="13" fill="url(#${u}b)" stroke="${ol}" stroke-width="3"/><rect x="108" y="158" width="26" height="30" rx="13" fill="url(#${u}b)" stroke="${ol}" stroke-width="3"/>
-    ${paw(79)}${paw(121)}
-    <ellipse cx="100" cy="138" rx="46" ry="9" fill="#000" opacity=".1"/>
-    <path d="M50 72L46 20L90 48Z" fill="${pt}" stroke="${ol}" stroke-width="3" stroke-linejoin="round"/><path d="M150 72L154 20L110 48Z" fill="${pt}" stroke="${ol}" stroke-width="3" stroke-linejoin="round"/>
-    <path d="M57 62L54 34L78 50Z" fill="#ffb3cf"/><path d="M143 62L146 34L122 50Z" fill="#ffb3cf"/>
-    <path d="M60 52l3-10M66 56l4-9M140 52l-3-10M134 56l-4-9" stroke="#ff8fb3" stroke-width="2" stroke-linecap="round"/>
-    <path d="M42 98L26 102L40 110L28 120L48 118Z" fill="${c}" stroke="${ol}" stroke-width="2.5" stroke-linejoin="round"/><path d="M158 98L174 102L160 110L172 120L152 118Z" fill="${c}" stroke="${ol}" stroke-width="2.5" stroke-linejoin="round"/>
-    <ellipse cx="100" cy="92" rx="60" ry="50" fill="url(#${u}b)" stroke="${ol}" stroke-width="3"/>
-    <ellipse cx="82" cy="62" rx="16" ry="8" fill="#fff" opacity=".18" transform="rotate(-20 82 62)"/>
-    ${marks}
-    <ellipse cx="100" cy="112" rx="24" ry="16" fill="url(#${u}t)"/>
-    <g fill="${sh(c, -.3)}" opacity=".35"><circle cx="86" cy="112" r="1.6"/><circle cx="82" cy="116" r="1.6"/><circle cx="90" cy="117" r="1.6"/><circle cx="114" cy="112" r="1.6"/><circle cx="118" cy="116" r="1.6"/><circle cx="110" cy="117" r="1.6"/></g>
-    <circle class="blush" cx="58" cy="116" r="9"/><circle class="blush" cx="142" cy="116" r="9"/>
-    <g class="eyes">${eye(72, 0)}${eye(128, 1)}</g>
-    <path d="M-7-4Q0-8 7-4Q5 2 0 5Q-5 2-7-4Z" transform="translate(100 105)" fill="#ff7f9f" stroke="#e0607f" stroke-width="1"/><circle cx="97" cy="102" r="1.6" fill="#fff" opacity=".8"/>
-    <g transform="translate(100 112)"><ellipse class="l tongue" cx="6" cy="12" rx="6" ry="8"/><path class="l m m-s" style="stroke:${mc}" d="M-14 0Q-7 10 0 0Q7 10 14 0"/><path class="l m m-f" style="stroke:${mc}" d="M-10 8Q0-2 10 8"/><ellipse class="l m-o" cx="0" cy="8" rx="7" ry="8"/></g>
-    <path class="wh" d="M60 106Q42 98 22 99M60 112Q42 112 20 116M60 118Q44 126 26 134M140 106Q158 98 178 99M140 112Q158 112 180 116M140 118Q156 126 174 134"/>
-    <g class="l paw"><ellipse cx="80" cy="128" rx="11" ry="9.5" fill="${pt}" stroke="${ol}" stroke-width="2.5"/></g>
-    ${acc(wear)}
-    ${k.shiny ? '<text x="150" y="40" font-size="20">✨</text><text x="30" y="50" font-size="16">✨</text>' : ""}
-    <text class="zzz" x="150" y="40">z</text><text class="zzz" x="168" y="22" style="animation-delay:1.2s;font-size:28px">Z</text>
+  const sc = kit ? .78 : 1, c = k.c, b = k.b, s = k.s, d = "#2d2236", pt = k.pt || c, pw = k.pt ? pt : b, ec = k.eye || d,
+    lc = (k.n === "Noir" || k.n === "Smoking") ? "#ffe9a8" : d, mc = k.n === "Noir" ? "#ffe9a8" : d, pk = "#ff9fc0";
+  const mk = k.t === "stripe" ? [[R(19,7,21,11),s],[R(15,8,16,11),s],[R(24,8,25,11),s],...MR(7,16,11,17,s),...MR(7,19,10,20,s),...MR(12,28,14,33,s)]
+    : k.t === "patch" ? [[E(12,12,4,3),s],[E(28,13,3,3),k.s2],[E(27,32,4,5),s]]
+    : k.t === "points" ? [[E(20,20,6,5),pt]]
+    : k.t === "tux" ? [[E(20,31,6,9),"#fff"],[E(20,21,5,3.5),"#fff"]] : [];
+  const base = [[E(20,31,10,8),c],[P([[8,13],[9,1],[17,8]]),pt],[P([[32,13],[31,1],[23,8]]),pt],[E(20,17,13,10),c],
+    [E(20,33,5,5),b],[E(20,21,5,3.5),b],...mk,[E(15,38,3,2),pw],[E(25,38,3,2),pw],
+    [P([[10,10],[10,5],[14,8]]),pk],[P([[30,10],[30,5],[26,8]]),pk],[R(19,19,21,20),"#e0607f"]];
+  const eo = [...MR(12,13,15,17,ec),...MR(13,14,14,16,d),...MR(12,13,13,14,"#fff")];
+  const eh = [...MR(12,16,13,17,lc),...MR(13,15,15,16,lc),...MR(15,16,16,17,lc)];
+  const hr = "#ff5c8a", ehr = [...MR(12,13,13,14,hr),...MR(14,13,15,14,hr),...MR(12,14,15,15,hr),...MR(13,15,14,16,hr)];
+  const wh = "#8a7a9a";
+  return `<svg class="cat" data-s="${st}" viewBox="0 0 40 40"><g>${px(base, sc, 1)}
+  ${GL("blush", MR(8,20,11,22,"#ff8fb3"), sc)}
+  <g class="eyes">${GL("l e-open", eo, sc)}${GL("l e-happy", eh, sc)}${GL("l e-sleep", MR(12,16,15,17,lc), sc)}${GL("l e-heart", ehr, sc)}${GL("l tear", MR(13,18,14,20,"#7cc8ff"), sc)}</g>
+  ${GL("l m m-s", [[R(17,22,18,23),mc],[R(18,23,22,24),mc],[R(22,22,23,23),mc]], sc)}
+  ${GL("l m m-f", [[R(17,23,18,24),mc],[R(18,22,22,23),mc],[R(22,23,23,24),mc]], sc)}
+  ${GL("l m m-o", [[R(18,22,22,25),"#c2455f"]], sc)}${GL("l tongue", [[R(19,24,21,26),"#ff7a9c"]], sc)}
+  ${GL("wh", [...MR(3,19,8,20,wh),...MR(3,22,8,23,wh)], sc)}
+  ${GL("l paw", [[E(14,27,3.5,4),pw]], sc, 1)}
+  ${acc(wear, sc)}
+  ${k.shiny ? GL("sp", [[R(33,3,34,8),"#ffe066"],[R(31,5,36,6),"#ffe066"]], sc) : ""}
+  <text class="zzz" x="30" y="8" font-size="5">z</text><text class="zzz" x="34" y="4" font-size="7" style="animation-delay:.9s">Z</text>
   </g></svg>`;
 }
 function catSide(k, kit, wear, dir) {
-  const u = "g" + (++CID), c = k.c, ol = sh(c, -.4), ir = IRIS[k.n] || "#6b4a9e", pt = k.pt || c, dk = sh(c, -.22), mc = k.n === "Noir" ? "#ffe9a8" : "#2d2236";
-  const marks = k.t === "stripe" ? `<path d="M72 98q5 10 3 20M90 94q5 10 3 24M108 94q5 10 3 24M126 98q4 8 2 16M150 69v9M142 71l3 8M158 71l-3 8" stroke="${k.s}" stroke-width="4.5" stroke-linecap="round" fill="none"/>`
-    : k.t === "patch" ? `<ellipse cx="82" cy="108" rx="20" ry="14" fill="${k.s}"/><ellipse cx="124" cy="118" rx="16" ry="12" fill="${k.s2}"/><ellipse cx="148" cy="80" rx="12" ry="8" fill="${k.s}"/>`
-    : k.t === "tux" ? `<ellipse cx="108" cy="140" rx="40" ry="14" fill="#fff"/>` : "";
-  const leg = (x, cls, col) => `<g transform="translate(${x} 138)"><g class="${cls}"><rect x="-8" y="0" width="16" height="44" rx="8" fill="${col}" stroke="${ol}" stroke-width="2.5"/><ellipse cx="3" cy="49" rx="12" ry="6.5" fill="${k.pt || sh(k.b, -.03)}" stroke="${ol}" stroke-width="2.5"/></g></g>`;
-  const T = "M56 126C26 126 20 86 42 72";
-  const eye = x => `<g transform="translate(${x} 93)"><ellipse rx="8" ry="10.5" fill="url(#${u}i)"/><ellipse rx="4" ry="7" fill="#1f1530"/><circle cx="-2" cy="-3" r="2.8" fill="#fff"/><circle cx="3" cy="4" r="1.4" fill="#fff"/></g>`;
-  return `<svg class="cat sd" data-s="walk" viewBox="0 0 200 200"><defs>
-    <radialGradient id="${u}b" cx=".4" cy=".25" r=".9"><stop offset="0" stop-color="${sh(c, .3)}"/><stop offset=".6" stop-color="${c}"/><stop offset="1" stop-color="${sh(c, -.2)}"/></radialGradient>
-    <radialGradient id="${u}t" cx=".5" cy=".3" r=".8"><stop offset="0" stop-color="${sh(k.b, .4)}"/><stop offset="1" stop-color="${sh(k.b, -.12)}"/></radialGradient>
-    <radialGradient id="${u}i" cx=".5" cy=".7" r=".75"><stop offset="0" stop-color="${sh(ir, .4)}"/><stop offset="1" stop-color="${sh(ir, -.3)}"/></radialGradient></defs>
-  <g class="cg${kit ? " kit" : ""}"><g class="flip" style="transform:scaleX(${dir})">
-    <ellipse cx="100" cy="194" rx="66" ry="7" fill="#000" opacity=".14"/>
-    ${leg(66, "lb", dk)}${leg(126, "la", dk)}
-    <g class="bd">
-      <g class="tail2"><path d="${T}" fill="none" stroke="${ol}" stroke-width="21" stroke-linecap="round"/><path d="${T}" fill="none" stroke="${pt}" stroke-width="17" stroke-linecap="round"/>${k.t === "stripe" ? `<path d="${T}" fill="none" stroke="${k.s}" stroke-width="17" stroke-dasharray="5 11" opacity=".7"/>` : ""}</g>
-      <ellipse cx="100" cy="122" rx="56" ry="31" fill="url(#${u}b)" stroke="${ol}" stroke-width="3"/>
-      <ellipse cx="104" cy="140" rx="40" ry="12" fill="url(#${u}t)"/>
-      ${marks}
-      <ellipse cx="84" cy="106" rx="18" ry="6" fill="#fff" opacity=".16" transform="rotate(-8 84 106)"/>
-      <g class="headg">
-        <path d="M132 72L134 42L158 66Z" fill="${pt}" stroke="${ol}" stroke-width="3" stroke-linejoin="round"/><path d="M138 64L139 50L150 62Z" fill="#ffb3cf"/>
-        <path d="M160 66L178 42L182 78Z" fill="${pt}" stroke="${ol}" stroke-width="3" stroke-linejoin="round"/><path d="M165 66L176 52L177 70Z" fill="#ffb3cf"/>
-        <ellipse cx="152" cy="96" rx="33" ry="29" fill="url(#${u}b)" stroke="${ol}" stroke-width="3"/>
-        ${k.t === "stripe" ? `<path d="M150 68v9M142 70l3 8M158 70l-3 8" stroke="${k.s}" stroke-width="4" stroke-linecap="round"/>` : ""}
-        <ellipse cx="172" cy="107" rx="14" ry="11" fill="url(#${u}t)"/>
-        <circle class="blush" cx="148" cy="108" r="7"/>
-        ${eye(156)}${eye(176)}
-        <path d="M181 99Q186 96 190 100Q187 106 185 106Q182 104 181 99Z" fill="#ff7f9f" stroke="#e0607f" stroke-width="1"/>
-        <path d="M185 108q-3 5-8 2M185 108q2 5 7 3" fill="none" stroke="${mc}" stroke-width="2" stroke-linecap="round"/>
-        <path class="wh" d="M178 108L198 102M178 112L199 113M176 116L196 123"/>
-        <g transform="translate(52 4)">${acc(wear === "glasses" || wear === "scarf" ? "" : wear)}</g>
-      </g>
-    </g>
-    ${leg(78, "la", `url(#${u}b)`)}${leg(138, "lb", `url(#${u}b)`)}
-  </g></g></svg>`;
+  const sc = kit ? .78 : 1, c = k.c, b = k.b, s = k.s, pt = k.pt || c, pw = k.pt ? pt : b, dk = sh(c, -.22), d = "#2d2236", ec = k.eye || d;
+  const mk = k.t === "stripe" ? [[R(10,21,11,26),s],[R(15,20,16,25),s],[R(20,20,21,25),s],[R(25,22,26,26),s]]
+    : k.t === "patch" ? [[E(12,25,4,3),s],[E(21,28,3,3),k.s2],[E(33,16,3,2),s]]
+    : k.t === "tux" ? [[E(18,31,9,3),"#fff"]] : [];
+  const leg = (x, cls, col) => GL(cls, [[R(x,31,x+4,38),col],[R(x,36,x+5,38),pw]], sc, 1);
+  const tail = [[R(3,23,8,26),c],[R(2,16,5,24),c],[R(3,13,6,17),pt]];
+  const body = [[E(17,26,12,7),c],[E(17,30,9,3),b],...mk];
+  const head = [[P([[23,15],[24,7],[29,13]]),c],[P([[30,13],[35,7],[37,16]]),c],[E(29,19,8,7),c],[E(34,22,3,2.5),b],
+    [R(31,17,33,20),ec],[R(31,17,32,18),"#fff"],[R(36,21,38,22),"#e0607f"]];
+  const w = wear === "glasses" || wear === "scarf" ? "" : wear;
+  return `<svg class="cat sd" viewBox="0 0 40 40"><g transform="${dir < 0 ? "translate(40 0) scale(-1 1)" : ""}">${leg(13,"lb",dk)}${leg(26,"lb",dk)}<g class="bd"><g class="tail2">${px(tail, sc, 1)}</g>${px(body, sc, 1)}<g class="headg">${px(head, sc, 1)}<g transform="translate(7 5)">${acc(w, sc)}</g></g></g>${leg(9,"la",c)}${leg(22,"la",c)}</g></svg>`;
 }
-const eggSVG = t => `<svg class="cat" data-s="egg" viewBox="0 0 200 200"><defs><radialGradient id="eg" cx=".38" cy=".3" r=".85"><stop offset="0" stop-color="#fffdf6"/><stop offset=".7" stop-color="#ffe9c9"/><stop offset="1" stop-color="#f3c99a"/></radialGradient></defs>
-  <ellipse cx="100" cy="194" rx="46" ry="7" fill="#000" opacity=".14"/><g class="egg">
-  <ellipse cx="100" cy="115" rx="52" ry="66" fill="url(#eg)" stroke="#e0b48a" stroke-width="3"/>
-  <circle cx="82" cy="102" r="9" fill="#ffc0d8"/><circle cx="122" cy="132" r="12" fill="#bfe0ff"/><circle cx="104" cy="164" r="7" fill="#ffe08a"/><circle cx="116" cy="90" r="5" fill="#d5f2c8"/>
-  <ellipse cx="78" cy="78" rx="8" ry="15" fill="#fff" opacity=".6" transform="rotate(25 78 78)"/>
-  ${t > 0 ? '<path d="M66 100l14 9-9 10 15 9" fill="none" stroke="#b98a5e" stroke-width="3" stroke-linecap="round"/>' : ""}
-  ${t > 1 ? '<path d="M134 84l-12 10 10 8-13 10" fill="none" stroke="#b98a5e" stroke-width="3" stroke-linecap="round"/>' : ""}</g></svg>`;
+const eggSVG = t => `<svg class="cat" data-s="egg" viewBox="0 0 40 40">${px([[E(20,38.5,9,1.2),"#0002"]])}<g class="egg">${px([[E(20,24,11,14),"#fff3dc"],
+  [R(16,19,19,22),"#ffc0d8"],[R(23,27,27,30),"#bfe0ff"],[R(19,32,21,34),"#ffe08a"],[R(22,16,24,18),"#d5f2c8"],[R(15,15,17,18),"#fff"],
+  ...(t > 0 ? [[R(14,21,15,22),OUT],[R(15,22,16,23),OUT],[R(14,23,15,24),OUT],[R(15,24,16,25),OUT]] : []),
+  ...(t > 1 ? [[R(25,19,26,20),OUT],[R(24,20,25,21),OUT],[R(25,21,26,22),OUT],[R(24,22,25,23),OUT]] : [])], 1, 1)}</g></svg>`;
+
+function sceneSVG(id, ph) {
+  const c = PH[ph], n = ph === "night", out = id === "sc_garden" || id === "sc_beach", o = [];
+  if (out) {
+    o.push([R(0,0,40,14),c.s1],[R(0,14,40,26),c.s2]);
+    if (id === "sc_garden") o.push([E(8,27,14,6),c.g2],[R(0,26,40,40),c.g1],[R(0,31,40,32),c.g2],[R(30,15,32,27),"#b9825a"],[E(31,12,6,6),c.g2],[R(7,34,9,35),"#ff7aa8"],[R(20,36,22,37),"#ffd24d"],[R(33,35,35,36),"#fff"]);
+    else o.push([R(0,17,40,27),c.sea],[R(0,22,40,23),"#fff8"],[R(0,26,40,40),c.sand],[R(8,33,12,35),"#ffb3cf"]);
+    if (n) [[3,3],[12,6],[20,2],[28,8],[35,4],[8,11],[24,10]].forEach(([x, y]) => o.push([R(x,y,x+1,y+1),"#fff"]));
+    o.push(n ? [R(30,3,34,7),"#fff8d6"] : [R(30,3,35,8), ph === "day" ? "#ffd84d" : "#ff8a5c"]);
+    if (!n) o.push([R(8,5,15,7),"#fff"],[R(10,4,13,5),"#fff"]);
+  } else o.push([R(0,0,40,27),c.wall],[R(0,27,40,40),c.floor],[R(0,27,40,28),sh(c.floor,-.2)],[R(25,4,37,17),"#fff"],[R(26,5,36,16),c.s1],[R(30,5,31,16),"#fff"],[R(26,10,36,11),"#fff"],
+    ...(id === "sc_bed" ? [[R(2,21,17,31),c.bw],[R(2,21,5,31),sh(c.bw,-.2)],[R(5,24,17,27),"#fff"]] : [[R(5,5,12,12),sh(c.wall,-.2)],[R(6,6,11,11),c.bw]]),[E(20,35,13,3),c.bw]);
+  return `<g shape-rendering="crispEdges" transform="scale(5)">${px(o)}</g>`;
+}
+const mini = (W, H, s) => `<svg viewBox="0 0 ${W} ${H}" shape-rendering="crispEdges">${px(s, 1, 1, W, H)}</svg>`;
+$("#bowl").innerHTML = mini(20, 8, [[R(1,2,19,4),"#ffd3e4"],[R(2,4,18,8),"#ff9fc0"],[R(5,1,15,2),"#fff"]]);
+{ const sv0 = $("#litter svg"); if (sv0) sv0.outerHTML = mini(24, 14, [[R(2,2,22,4),"#f3e3b4"],[R(0,4,24,7),"#b9a2ff"],[R(1,7,23,14),"#a58df0"],[R(5,9,19,10),"#fff8"]]); }
 
 /* ---------- Décors (changent avec l’heure réelle) ---------- */
 const PH = {
@@ -355,51 +298,6 @@ const PH = {
   dusk:  { s1: "#ff9e7d", s2: "#ffd9b8", wall: "#f5c6c9", floor: "#d9a37e", g1: "#a8b56f", g2: "#8a9d5e", sea: "#ff9d8a", sand: "#f0c58f", bw: "#d9bfe0" },
   night: { s1: "#1d1b3a", s2: "#4a3f7a", wall: "#5b4f86", floor: "#6a5a7c", g1: "#3e6b5a", g2: "#2f5a4c", sea: "#243a73", sand: "#8a7a9a", bw: "#3d3566" }
 };
-const sunSVG = (ph, x, y, r) => ph === "night"
-  ? `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff8d6"/><circle cx="${x - r * .3}" cy="${y + r * .2}" r="${r * .25}" fill="#e9e2b8"/><circle cx="${x + r * .35}" cy="${y - r * .3}" r="${r * .18}" fill="#e9e2b8"/>`
-  : `<circle cx="${x}" cy="${y}" r="${r * 1.7}" fill="${ph === "day" ? "#fff2a8" : "#ffb08a"}" opacity=".5"/><circle cx="${x}" cy="${y}" r="${r}" fill="${ph === "day" ? "#ffd84d" : "#ff8a5c"}"/>`;
-const starsSVG = (ph, pts) => ph === "night" ? pts.map(([x, y]) => `<path d="M${x} ${y - 3}L${x + 1} ${y - 1}L${x + 3} ${y}L${x + 1} ${y + 1}L${x} ${y + 3}L${x - 1} ${y + 1}L${x - 3} ${y}L${x - 1} ${y - 1}Z" fill="#fff" opacity=".9"/>`).join("") : "";
-const cloudSVG = (x, y, s = 1) => `<g transform="translate(${x} ${y}) scale(${s})"><g class="cloud"><ellipse rx="16" ry="7" fill="#fff" opacity=".85"/><ellipse cx="-9" cy="2" rx="9" ry="6" fill="#fff" opacity=".85"/><ellipse cx="10" cy="2" rx="10" ry="6" fill="#fff" opacity=".85"/></g></g>`;
-
-function sceneSVG(id, ph) {
-  const c = PH[ph], night = ph === "night";
-  const sky = `<defs><linearGradient id="sk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${c.s1}"/><stop offset="1" stop-color="${c.s2}"/></linearGradient></defs>`;
-  const SP = [[20, 24], [60, 14], [110, 30], [150, 16], [180, 44], [36, 60], [92, 12], [130, 52]];
-  if (id === "sc_garden") {
-    const leaf = night ? "#2f6b57" : "#5dbb7a";
-    return `${sky}<rect width="200" height="200" fill="url(#sk)"/>${sunSVG(ph, 150, 42, 14)}${starsSVG(ph, SP)}${night ? "" : cloudSVG(50, 36) + cloudSVG(110, 62, .7)}
-    <path d="M0 126Q50 96 100 120T200 112V200H0Z" fill="${c.g1}"/><path d="M0 150Q60 130 120 148T200 140V200H0Z" fill="${c.g2}"/>
-    <rect x="24" y="96" width="9" height="50" fill="#9a6b45"/><circle cx="28" cy="84" r="24" fill="${leaf}"/><circle cx="16" cy="96" r="14" fill="${leaf}"/><circle cx="42" cy="94" r="14" fill="${leaf}"/>
-    <path d="M140 128v30M154 126v30M168 124v30M182 122v30M134 138H200M134 148H200" stroke="#fff" stroke-width="5" opacity=".9"/>
-    ${[[50, 176, "#ff7aa8"], [84, 184, "#ffd24d"], [150, 180, "#ff7aa8"], [176, 172, "#ffffff"], [20, 178, "#ffd24d"]].map(([x, y, f]) => `<g transform="translate(${x} ${y})"><path d="M0 0v8" stroke="#3f9a5a" stroke-width="2"/><circle cy="-1" r="4" fill="${f}"/><circle cy="-1" r="1.6" fill="#fff6a8"/></g>`).join("")}`;
-  }
-  if (id === "sc_bed") return `${sky}<rect width="200" height="200" fill="${c.bw}"/>
-    ${[...Array(14)].map((_, i) => `<circle cx="${(i * 47) % 190 + 8}" cy="${(i * 31) % 120 + 10}" r="2" fill="#fff" opacity=".35"/>`).join("")}
-    <rect x="118" y="30" width="56" height="62" rx="28" fill="url(#sk)" stroke="#fff" stroke-width="5"/>${sunSVG(ph, 146, 56, 9)}${starsSVG(ph, [[134, 44], [158, 70], [140, 76]])}
-    <rect y="148" width="200" height="52" fill="${night ? "#5a4a6e" : "#d9b48f"}"/><path d="M0 148H200" stroke="rgba(0,0,0,.12)" stroke-width="3"/>
-    <rect x="6" y="104" width="64" height="46" rx="8" fill="#a8734a"/><rect x="8" y="94" width="60" height="30" rx="10" fill="#ffc2d8"/><rect x="12" y="86" width="26" height="14" rx="7" fill="#fff"/><path d="M8 112h60M8 120h60" stroke="#ff9fc0" stroke-width="3"/>
-    <rect x="172" y="120" width="22" height="30" rx="3" fill="#a8734a"/><path d="M183 120V104" stroke="#555" stroke-width="3"/><path d="M174 104h18l-4-16h-10Z" fill="#ffd27a"/>${ph !== "day" ? '<ellipse cx="183" cy="100" rx="40" ry="34" fill="#ffd27a" opacity=".18"/>' : ""}
-    <ellipse cx="100" cy="180" rx="56" ry="12" fill="#b48cff" opacity=".7"/>`;
-  if (id === "sc_beach") return `${sky}<rect width="200" height="200" fill="url(#sk)"/>${sunSVG(ph, 40, 40, 13)}${starsSVG(ph, SP)}${night ? "" : cloudSVG(130, 40, .9)}
-    <rect y="98" width="200" height="50" fill="${c.sea}"/><path d="M0 108q12-6 25 0t25 0 25 0 25 0 25 0 25 0 25 0 25 0M0 124q12-6 25 0t25 0 25 0 25 0 25 0 25 0 25 0 25 0" stroke="#fff" stroke-width="2" fill="none" opacity=".5"/>
-    <path d="M0 142Q100 126 200 142V200H0Z" fill="${c.sand}"/>
-    <path d="M162 176L168 120" stroke="#9a6b45" stroke-width="4"/><path d="M142 124Q166 100 192 124Z" fill="#ff7a8a"/><path d="M154 124Q166 104 168 124M170 124Q172 104 180 122" stroke="#fff" stroke-width="3" fill="none"/>
-    <path d="M26 186q6-12 12 0z" fill="#ffd0e0" stroke="#ff9fc0" stroke-width="1.5"/><circle cx="60" cy="190" r="4" fill="#ffd0e0" stroke="#ff9fc0"/>`;
-  if (id === "sc_city") { const W = ph === "day" ? "#bfe6ff" : "#ffd27a";
-    return `${sky}<rect width="200" height="200" fill="url(#sk)"/>${sunSVG(ph, 150, 40, 12)}${starsSVG(ph, SP)}
-    ${[[0, 96, 34, 80], [30, 76, 28, 100], [56, 104, 30, 70], [130, 88, 26, 90], [154, 70, 24, 110], [176, 98, 26, 80]].map(([x, y, w, h]) => `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${night ? "#2a2850" : ph === "dusk" ? "#7a5a7c" : "#9fb4d0"}"/>${[0, 1, 2].map(r => [0, 1].map(cn => (r + cn + x) % 3 ? `<rect x="${x + 5 + cn * (w / 2 - 2)}" y="${y + 8 + r * 16}" width="7" height="9" fill="${W}" opacity="${ph === "day" ? .5 : 1}"/>` : "").join("")).join("")}`).join("")}
-    <rect y="152" width="200" height="48" fill="${night ? "#3b3558" : "#c7b9a8"}"/><path d="M0 152H200" stroke="rgba(0,0,0,.2)" stroke-width="4"/><path d="M0 164H200M0 184H200" stroke="rgba(0,0,0,.08)" stroke-width="2"/>`; }
-  return `${sky}<rect width="200" height="200" fill="${c.wall}"/>
-    <rect x="52" y="34" width="84" height="76" rx="8" fill="url(#sk)" stroke="#fff" stroke-width="6"/>${sunSVG(ph, 116, 58, 9)}${starsSVG(ph, [[64, 50], [84, 68], [74, 90], [106, 88]])}${night ? "" : cloudSVG(80, 56, .6)}
-    <path d="M94 34v76M52 72h84" stroke="#fff" stroke-width="4"/>
-    <path d="M46 30Q58 70 46 112H34V30Z M142 30Q130 70 142 112H154V30Z" fill="#ff9fc0" opacity=".85"/>
-    <rect x="156" y="52" width="26" height="32" rx="3" fill="#fff" stroke="#e6a8c0" stroke-width="3"/><circle cx="169" cy="72" r="5" fill="#ffc2d8"/><circle cx="163" cy="62" r="2.4" fill="#ffc2d8"/><circle cx="169" cy="59" r="2.4" fill="#ffc2d8"/><circle cx="175" cy="62" r="2.4" fill="#ffc2d8"/>
-    <rect y="150" width="200" height="50" fill="${c.floor}"/><path d="M0 150H200" stroke="rgba(0,0,0,.12)" stroke-width="3"/><path d="M0 168H200M0 186H200M40 150L26 200M100 150V200M160 150L176 200" stroke="rgba(0,0,0,.08)" stroke-width="2"/>
-    <ellipse cx="100" cy="182" rx="72" ry="14" fill="#ff9fc0"/><ellipse cx="100" cy="182" rx="56" ry="9" fill="#ffc2d8"/>
-    <path d="M12 150h18l-3 22h-12z" fill="#e58d6a"/><path d="M21 150Q8 122 14 108M21 150Q34 126 30 106M21 150Q21 120 21 100" stroke="#4fb286" stroke-width="5" fill="none" stroke-linecap="round"/>
-    ${night ? '<ellipse cx="100" cy="150" rx="95" ry="60" fill="#ffd27a" opacity=".1"/>' : ""}`;
-}
-
 /* ---------- Données & règles (inspirées de TamaPoke, en version douce) ---------- */
 const newPet = () => ({ stage: "egg", ci: roll(), name: "", age: 0, f: 80, j: 80, e: 80, h: 100, poo: 0, asleep: false, taps: 0, fav: (Math.random() * 3) | 0, fk: false });
 let G = JSON.parse(localStorage.getItem(KEY) || "null") || { pet: newPet(), dex: [], streak: 0, lastDay: "", last: Date.now(), mute: false };
@@ -593,7 +491,7 @@ function shopRender() {
 let bx = null, bd = 0;
 $("#cat").addEventListener("pointerdown", e => { bx = [e.clientX, e.clientY]; bd = 0; });
 document.addEventListener("pointermove", e => {
-  const ey = $(".eyes"); if (ey) ey.style.transform = `translate(${(e.clientX / innerWidth - .5) * 10}px,${(e.clientY / innerHeight - .3) * 8}px)`;
+  const ey = $(".eyes"); if (ey) ey.style.transform = `translate(${Math.round((e.clientX / innerWidth - .5) * 2)}px,${Math.round((e.clientY / innerHeight - .3) * 1.5)}px)`;
   if (bx && G.pet.stage !== "egg" && !G.pet.asleep) {
     bd += Math.hypot(e.clientX - bx[0], e.clientY - bx[1]); bx = [e.clientX, e.clientY];
     if (bd > 260) { bd = 0; act(() => { G.pet.j = clamp(G.pet.j + 2); }); burst(e.clientX, e.clientY, ["💗", "✨"], 1);
