@@ -114,6 +114,27 @@ body.blink .cat .e-open{visibility:hidden}
 @keyframes chew{from{transform:translateY(0)}to{transform:translateY(2px)}}
 .sd[data-s=pounce] .bd{animation:hop .5s steps(1) 2}
 @keyframes hop{50%{transform:translateY(-4px)}}
+
+/* sprites */
+#cat{container-type:size}
+.spr{--w:round(down,80cqw,64px);position:absolute;left:calc((100cqw - var(--w)) / 2);bottom:3cqw;width:var(--w);height:var(--w);background:no-repeat 0 0 / calc(var(--w) * 10) var(--w);background-image:var(--m);image-rendering:pixelated;animation:mo 1.4s steps(10) infinite}
+.spr.kit{--w:round(down,60cqw,64px)}
+.spr[data-s=sad],.spr[data-s=sleep],.spr[data-s=blep]{background-image:var(--p);background-size:calc(var(--w) * 4) calc(var(--w) * 3)}
+.spr[data-s=sad]{animation:p4 1s steps(4) infinite}
+.spr[data-s=sleep]{background-position-y:calc(var(--w) * -2);animation:p4 2.4s steps(4) infinite}
+.spr[data-s=blep]{background-position-y:calc(var(--w) * -1);animation:p2 .5s steps(2) infinite}
+.spr.sd[data-s]{animation:mo 1.4s steps(10) infinite,bobt .35s steps(1) infinite!important}
+.spr.sd[data-s=run]{animation:mo .7s steps(10) infinite,bobt .26s steps(1) infinite!important}
+@keyframes mo{to{background-position-x:calc(var(--w) * -10)}}
+@keyframes p4{to{background-position-x:calc(var(--w) * -4)}}
+@keyframes p2{to{background-position-x:calc(var(--w) * -2)}}
+@keyframes bobt{50%{translate:0 -1.2cqw}}
+.wear{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.spr[data-s=sleep] .wear{display:none}
+#dexg div{container-type:inline-size}
+#dexg .spr{position:relative;left:0;bottom:0;--w:100cqw}
+#dexg .lock .spr{filter:brightness(0);opacity:.25}
+#bowl{width:24%}
 </style>
 </head>
 <body>
@@ -230,46 +251,32 @@ function px(shapes, sc = 1, ol = 0, W = 40, H = 40) {
 }
 const GL = (cls, s, sc = 1, ol = 0) => `<g class="${cls}">${px(s, sc, ol)}</g>`;
 
-function catSVG(k, st, kit, wear) {
-  const sc = kit ? .78 : 1, c = k.c, b = k.b, s = k.s, d = "#2d2236", pt = k.pt || c, pw = k.pt ? pt : b, ec = k.eye || d,
-    lc = (k.n === "Noir" || k.n === "Smoking") ? "#ffe9a8" : d, mc = k.n === "Noir" ? "#ffe9a8" : d, pk = "#ff9fc0";
-  const mk = k.t === "stripe" ? [[R(19,7,21,11),s],[R(15,8,16,11),s],[R(24,8,25,11),s],...MR(7,16,11,17,s),...MR(7,19,10,20,s),...MR(12,28,14,33,s)]
-    : k.t === "patch" ? [[E(12,12,4,3),s],[E(28,13,3,3),k.s2],[E(27,32,4,5),s]]
-    : k.t === "points" ? [[E(20,20,6,5),pt]]
-    : k.t === "tux" ? [[E(20,31,6,9),"#fff"],[E(20,21,5,3.5),"#fff"]] : [];
-  const base = [[E(20,31,10,8),c],[P([[8,13],[9,1],[17,8]]),pt],[P([[32,13],[31,1],[23,8]]),pt],[E(20,17,13,10),c],
-    [E(20,33,5,5),b],[E(20,21,5,3.5),b],...mk,[E(15,38,3,2),pw],[E(25,38,3,2),pw],
-    [P([[10,10],[10,5],[14,8]]),pk],[P([[30,10],[30,5],[26,8]]),pk],[R(19,19,21,20),"#e0607f"]];
-  const eo = [...MR(12,13,15,17,ec),...MR(13,14,14,16,d),...MR(12,13,13,14,"#fff")];
-  const eh = [...MR(12,16,13,17,lc),...MR(13,15,15,16,lc),...MR(15,16,16,17,lc)];
-  const hr = "#ff5c8a", ehr = [...MR(12,13,13,14,hr),...MR(14,13,15,14,hr),...MR(12,14,15,15,hr),...MR(13,15,14,16,hr)];
-  const wh = "#8a7a9a";
-  return `<svg class="cat" data-s="${st}" viewBox="0 0 40 40"><g>${px(base, sc, 1)}
-  ${GL("blush", MR(8,20,11,22,"#ff8fb3"), sc)}
-  <g class="eyes">${GL("l e-open", eo, sc)}${GL("l e-happy", eh, sc)}${GL("l e-sleep", MR(12,16,15,17,lc), sc)}${GL("l e-heart", ehr, sc)}${GL("l tear", MR(13,18,14,20,"#7cc8ff"), sc)}</g>
-  ${GL("l m m-s", [[R(17,22,18,23),mc],[R(18,23,22,24),mc],[R(22,22,23,23),mc]], sc)}
-  ${GL("l m m-f", [[R(17,23,18,24),mc],[R(18,22,22,23),mc],[R(22,23,23,24),mc]], sc)}
-  ${GL("l m m-o", [[R(18,22,22,25),"#c2455f"]], sc)}${GL("l tongue", [[R(19,24,21,26),"#ff7a9c"]], sc)}
-  ${GL("wh", [...MR(3,19,8,20,wh),...MR(3,22,8,23,wh)], sc)}
-  ${GL("l paw", [[E(14,27,3.5,4),pw]], sc, 1)}
-  ${acc(wear, sc)}
-  ${k.shiny ? GL("sp", [[R(33,3,34,8),"#ffe066"],[R(31,5,36,6),"#ffe066"]], sc) : ""}
-  <text class="zzz" x="30" y="8" font-size="5">z</text><text class="zzz" x="34" y="4" font-size="7" style="animation-delay:.9s">Z</text>
-  </g></svg>`;
+/* ---------- Sprites (packs ToffeeCraft) : chat recoloré à la volée pour chaque robe ---------- */
+const SPR = {}, tinted = {}, TS = document.head.appendChild(document.createElement("style"));
+const hx = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+function recolor(img, keys, out) {
+  const cv = document.createElement("canvas"); cv.width = img.width; cv.height = img.height;
+  const cx = cv.getContext("2d"); cx.drawImage(img, 0, 0);
+  const d = cx.getImageData(0, 0, cv.width, cv.height), a = d.data;
+  for (let i = 0; i < a.length; i += 4) { if (!a[i + 3]) continue;
+    let best = null, bd = 300;
+    for (const [r, g, b, to] of keys) { const e = (a[i] - r) ** 2 + (a[i + 1] - g) ** 2 + (a[i + 2] - b) ** 2; if (e < bd) { bd = e; best = to; } }
+    if (!best && out && a[i] < 70 && a[i + 1] < 50 && a[i + 2] < 30) best = out;
+    if (best) { a[i] = best[0]; a[i + 1] = best[1]; a[i + 2] = best[2]; } }
+  cx.putImageData(d, 0, 0); return cv.toDataURL();
 }
-function catSide(k, kit, wear, dir) {
-  const sc = kit ? .78 : 1, c = k.c, b = k.b, s = k.s, pt = k.pt || c, pw = k.pt ? pt : b, dk = sh(c, -.22), d = "#2d2236", ec = k.eye || d;
-  const mk = k.t === "stripe" ? [[R(10,21,11,26),s],[R(15,20,16,25),s],[R(20,20,21,25),s],[R(25,22,26,26),s]]
-    : k.t === "patch" ? [[E(12,25,4,3),s],[E(21,28,3,3),k.s2],[E(33,16,3,2),s]]
-    : k.t === "tux" ? [[E(18,31,9,3),"#fff"]] : [];
-  const leg = (x, cls, col) => GL(cls, [[R(x,31,x+4,38),col],[R(x,36,x+5,38),pw]], sc, 1);
-  const tail = [[R(3,23,8,26),c],[R(2,16,5,24),c],[R(3,13,6,17),pt]];
-  const body = [[E(17,26,12,7),c],[E(17,30,9,3),b],...mk];
-  const head = [[P([[23,15],[24,7],[29,13]]),c],[P([[30,13],[35,7],[37,16]]),c],[E(29,19,8,7),c],[E(34,22,3,2.5),b],
-    [R(31,17,33,20),ec],[R(31,17,32,18),"#fff"],[R(36,21,38,22),"#e0607f"]];
-  const w = wear === "glasses" || wear === "scarf" ? "" : wear;
-  return `<svg class="cat sd" viewBox="0 0 40 40"><g transform="${dir < 0 ? "translate(40 0) scale(-1 1)" : ""}">${leg(13,"lb",dk)}${leg(26,"lb",dk)}<g class="bd"><g class="tail2">${px(tail, sc, 1)}</g>${px(body, sc, 1)}<g class="headg">${px(head, sc, 1)}<g transform="translate(7 5)">${acc(w, sc)}</g></g></g>${leg(9,"la",c)}${leg(22,"la",c)}</g></svg>`;
+function tint(k) {
+  const id = COATS.indexOf(k); if (tinted[id] || !SPR.cats || !SPR.idle) return id;
+  const c = hx(k.c), b = hx(k.b), s = (h, a) => hx(sh(h, a)), dark = (c[0] + c[1] + c[2]) / 3 < 90;
+  const Pc = recolor(SPR.cats, [[201,172,153,c],[192,161,141,s(k.c,-.06)],[255,255,227,b],[234,234,211,s(k.b,-.07)],[222,222,201,s(k.b,-.13)]], dark ? [20,16,28] : null);
+  const Mo = recolor(SPR.idle, [[253,213,181,c],[230,180,160,s(k.c,-.1)],[215,140,119,s(k.c,-.22)],[254,245,230,b]], null);
+  TS.textContent += `.t${id}{--p:url(${Pc});--m:url(${Mo})}`; tinted[id] = 1; return id;
 }
+Promise.all([["cats", "sprites/cats.png"], ["idle", "sprites/idle.png"]].map(([n, u]) => new Promise(r => { const i = new Image(); i.onload = () => { SPR[n] = i; r(); }; i.onerror = r; i.src = u; })))
+  .then(() => { lastKey = ""; render(); });
+const wearSVG = w => w ? `<svg class="wear" viewBox="0 0 40 40" shape-rendering="crispEdges"><g transform="translate(0 -1)">${acc(w, 1)}</g></svg>` : "";
+const catSVG = (k, st, kit, wear) => `<div class="cat spr${kit ? " kit" : ""} t${tint(k)}" data-s="${st}">${wearSVG(wear)}</div>`;
+const catSide = (k, kit, wear, dir) => `<div class="cat spr sd${kit ? " kit" : ""} t${tint(k)}" data-s="walk" style="transform:scaleX(${dir})">${wearSVG(wear)}</div>`;
 const eggSVG = t => `<svg class="cat" data-s="egg" viewBox="0 0 40 40">${px([[E(20,38.5,9,1.2),"#0002"]])}<g class="egg">${px([[E(20,24,11,14),"#fff3dc"],
   [R(16,19,19,22),"#ffc0d8"],[R(23,27,27,30),"#bfe0ff"],[R(19,32,21,34),"#ffe08a"],[R(22,16,24,18),"#d5f2c8"],[R(15,15,17,18),"#fff"],
   ...(t > 0 ? [[R(14,21,15,22),OUT],[R(15,22,16,23),OUT],[R(14,23,15,24),OUT],[R(15,24,16,25),OUT]] : []),
@@ -289,7 +296,7 @@ function sceneSVG(id, ph) {
   return `<g shape-rendering="crispEdges" transform="scale(5)">${px(o)}</g>`;
 }
 const mini = (W, H, s) => `<svg viewBox="0 0 ${W} ${H}" shape-rendering="crispEdges">${px(s, 1, 1, W, H)}</svg>`;
-$("#bowl").innerHTML = mini(20, 8, [[R(1,2,19,4),"#ffd3e4"],[R(2,4,18,8),"#ff9fc0"],[R(5,1,15,2),"#fff"]]);
+$("#bowl").innerHTML = '<img src="sprites/bowl.png" alt="" style="width:100%;display:block;image-rendering:pixelated">';
 { const sv0 = $("#litter svg"); if (sv0) sv0.outerHTML = mini(24, 14, [[R(2,2,22,4),"#f3e3b4"],[R(0,4,24,7),"#b9a2ff"],[R(1,7,23,14),"#a58df0"],[R(5,9,19,10),"#fff8"]]); }
 
 /* ---------- Décors (changent avec l’heure réelle) ---------- */
@@ -388,7 +395,7 @@ function render() {
   if (shownPoo > p.poo) shownPoo = p.poo;
   const key = p.stage + p.ci + G.wear + life.mode + (life.mode === "side" ? life.dir : "") + (p.stage === "egg" ? p.taps : "");
   if (key !== lastKey) { $("#cat").innerHTML = p.stage === "egg" ? eggSVG(p.taps) : life.mode === "side" ? catSide(k, p.stage === "kitten", G.wear, life.dir) : catSVG(k, mood(), p.stage === "kitten", G.wear); lastKey = key; }
-  const svg = $("#cat svg"); if (svg && p.stage !== "egg") svg.dataset.s = life.mode === "side" ? life.act : mood();
+  const svg = $("#cat .cat"); if (svg && p.stage !== "egg") svg.dataset.s = life.mode === "side" ? life.act : mood();
   const h = new Date().getHours();
   const ph = p.asleep || h >= 21 || h < 5 ? "night" : (h >= 7 && h < 18 ? "day" : "dusk");
   if (bgKey !== G.scene + ph) { bgKey = G.scene + ph; $("#bg").innerHTML = sceneSVG(G.scene, ph); }

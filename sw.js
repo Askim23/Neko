@@ -1,4 +1,4 @@
-const C = "neko-v5", F = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png"];
+const C = "neko-v6", F = ["./", "index.html", "manifest.webmanifest", "icon-192.png", "icon-512.png", "sprites/cats.png", "sprites/idle.png", "sprites/bowl.png"];
 self.addEventListener("install", e => e.waitUntil(caches.open(C).then(c => c.addAll(F)).then(() => self.skipWaiting())));
 self.addEventListener("activate", e => e.waitUntil(clients.claim()));
 self.addEventListener("fetch", e => e.respondWith(
