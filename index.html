@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0f380f">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>Neko</title>
+<style>
+:root{--d:#0f380f;--m:#306230;--l:#8bac0f;--x:#9bbc0f;--c:polygon(4px 0,calc(100% - 4px) 0,calc(100% - 4px) 4px,100% 4px,100% calc(100% - 4px),calc(100% - 4px) calc(100% - 4px),calc(100% - 4px) 100%,4px 100%,4px calc(100% - 4px),0 calc(100% - 4px),0 4px,4px 4px)}
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{display:flex;flex-direction:column;align-items:center;overflow:hidden;touch-action:manipulation;background:var(--x);color:var(--d);font:400 .62rem/1.5 "Press Start 2P",ui-monospace,Menlo,monospace;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+svg{shape-rendering:crispEdges}
+#top{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 12px;font-size:.58rem}
+#top button{font-size:1rem}
+#stage{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center;position:relative}
+#screen{width:min(96vw,58vh);aspect-ratio:1;position:relative;overflow:hidden;border:6px solid var(--d);box-shadow:0 0 0 4px var(--m),0 8px 0 4px var(--d);background:var(--l)}
+#bg{position:absolute;inset:0;width:100%;height:100%}
+#cat{position:absolute;inset:0;z-index:1}
+#cat svg{width:100%;height:100%}
+#run{display:none}
+#bubble{position:absolute;top:3%;left:50%;transform:translate(-50%,-6px);background:#e0f8d0;border:3px solid var(--d);padding:8px 10px;font-size:.5rem;opacity:0;pointer-events:none;max-width:88%;text-align:center;z-index:6}
+#bubble.on{opacity:1;transform:translate(-50%,0)}
+#stats{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;width:min(90vw,420px);padding:8px 0}
+.st{display:flex;align-items:center;gap:6px;font-size:1rem}
+.bar{flex:1;height:12px;background:var(--x);border:3px solid var(--d)}
+.bar i{display:block;height:100%;background:var(--d)}
+.bar i.low{background:#c0392b;animation:bl .6s steps(1) infinite}
+@keyframes bl{50%{opacity:.3}}
+#special{min-height:46px;display:flex;align-items:center}
+#special button,#bar button,.ov .opt{background:var(--l);border:3px solid var(--d);box-shadow:0 4px 0 var(--m);font-size:.55rem;padding:10px 14px}
+#special button:active,#bar button:active,.ov .opt:active{transform:translateY(3px);box-shadow:none}
+#bar{display:flex;gap:6px;width:min(94vw,460px);padding:6px 0 14px}
+#bar button{flex:1;padding:8px 0;font-size:.45rem;display:flex;flex-direction:column;align-items:center;gap:4px}
+#bar button b{font-size:1.4rem;font-weight:400}
+.ov{position:fixed;inset:0;z-index:20;background:var(--x);display:flex;flex-direction:column;align-items:center;justify-content:safe center;gap:14px;padding:20px;text-align:center;overflow-y:auto}
+.ov[hidden]{display:none}
+.ov h2{font-size:.75rem;line-height:1.6}
+.ov .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.ov .opt b{display:block;font-size:1.6rem;font-weight:400}
+#dexg,#shopg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(92vw,420px)}
+#dexg div{background:var(--l);border:3px solid var(--d);padding:4px;font-size:.45rem}
+#dexg .lock svg{filter:brightness(0);opacity:.25}
+#shopg .opt{min-width:0;padding:8px 2px;font-size:.45rem}
+#shopg .opt.on{outline:3px solid var(--d)}
+#ach{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;width:min(92vw,420px);font-size:.45rem}
+#ach span{border:2px solid var(--d);padding:3px 5px;opacity:.35}
+#ach span.ok{opacity:1;background:var(--l)}
+input{user-select:text;-webkit-user-select:text;width:min(92vw,360px);padding:10px;border:3px solid var(--d);font:inherit;font-size:.5rem;color:var(--d);background:#e0f8d0}
+#cfg p{font-size:.45rem;max-width:360px;line-height:1.8}
+#ball{position:absolute;font-size:3rem}
+.p{position:fixed;font-size:22px;pointer-events:none;animation:rise 1.4s steps(7) forwards;z-index:30}
+@keyframes rise{to{transform:translate(var(--dx),-120px);opacity:0}}
+.bf{position:absolute;left:-12%;font-size:2rem;z-index:3;animation:fly 7s steps(28) forwards}
+@keyframes fly{0%{left:-12%;transform:translateY(0)}50%{transform:translateY(10px)}100%{left:105%;transform:translateY(0)}}
+#deco{position:absolute;left:14%;bottom:9%;z-index:2;font-size:1.5rem;display:flex;gap:2px}
+#bowl{position:absolute;left:4%;bottom:4%;width:20%;z-index:1;transition:opacity .4s}
+#litter{position:absolute;right:3%;bottom:4%;width:27%;z-index:3;cursor:pointer;transition:opacity .4s}
+#bowl svg,#litter svg{width:100%;display:block}
+#food{position:absolute;left:4%;bottom:13%;width:20%;text-align:center;font-size:1.3rem;z-index:1;opacity:0}
+#food.on{opacity:1}
+#toy{position:absolute;bottom:7%;font-size:1.6rem;z-index:2;opacity:0;transition:left 1s steps(8)}
+#toy.on{opacity:1}
+#toy.roll{animation:rl .5s steps(4) infinite}
+@keyframes rl{to{transform:rotate(360deg)}}
+#poos{position:absolute;left:50%;top:-12%;transform:translateX(-50%);display:flex;font-size:1.1rem;pointer-events:none}
+.fly{display:none;position:absolute;left:20%;top:-30%;font-size:.9rem;pointer-events:none}
+.dirty .fly{display:block;animation:circ 1.6s steps(4) infinite}
+@keyframes circ{25%{transform:translate(24px,-8px)}50%{transform:translate(40px,6px)}75%{transform:translate(14px,12px)}}
+#litter.busy svg,#litter.scoop svg{animation:shk .25s steps(1) infinite}
+#litter.scoop svg{animation-iteration-count:4}
+#litter.busy::after{content:"💭";position:absolute;left:30%;top:-55%;font-size:1.2rem}
+@keyframes shk{25%{transform:translateX(-2px)}75%{transform:translateX(2px)}}
+#screen.running #bowl,#screen.running #litter{opacity:0}
+/* chat pixel */
+.l{opacity:0}
+.blush{opacity:.45}
+.cat{animation:fl 1.6s steps(1) infinite}
+.cat[data-s=sleep]{animation-duration:3.2s}
+@keyframes fl{0%{transform:none}50%{transform:translateY(-2%)}}
+.cat[data-s=egg] .egg{animation:wob 2s steps(1) infinite}
+@keyframes wob{0%,80%,100%{transform:none}85%{transform:translateX(-1px)}92%{transform:translateX(1px)}}
+.cat[data-s=idle] .e-open,.cat[data-s=sad] .e-open,.cat[data-s=eat] .e-open{opacity:1}
+.cat[data-s=happy] .e-happy,.cat[data-s=blep] .e-happy,.cat[data-s=groom] .e-happy,.cat[data-s=stretch] .e-happy{opacity:1}
+.cat[data-s=love] .e-heart{opacity:1}
+.cat[data-s=sleep] .e-sleep{opacity:1}
+.cat[data-s=sad] .tear,.cat[data-s=sad] .m-f,.cat[data-s=eat] .m-o{opacity:1}
+.cat:is([data-s=idle],[data-s=happy],[data-s=love],[data-s=sleep],[data-s=blep],[data-s=groom],[data-s=stretch]) .m-s{opacity:1}
+.cat:is([data-s=blep],[data-s=groom]) .tongue{opacity:1}
+.cat:is([data-s=happy],[data-s=love]) .blush{opacity:1}
+body.blink .cat .e-open{visibility:hidden}
+.zzz{opacity:0;fill:var(--m);font-family:"Press Start 2P",monospace}
+.cat[data-s=sleep] .zzz{animation:zz 3s steps(4) infinite}
+@keyframes zz{0%{opacity:0;transform:translateY(3px)}30%{opacity:1}100%{opacity:0;transform:translateY(-4px)}}
+.cat[data-s=groom] .paw{opacity:1;animation:lick .45s steps(1) infinite alternate}
+@keyframes lick{from{transform:translate(0,2px)}to{transform:translate(3px,-3px)}}
+.cat[data-s=stretch]{animation:str 1.8s steps(1);transform-origin:50% 96%}
+@keyframes str{0%,100%{transform:none}30%,70%{transform:scale(1.1,.86)}}
+.sd{animation:none!important}
+.sd[data-s=walk] .la,.sd[data-s=run] .la{animation:lg .7s steps(1) infinite alternate}
+.sd[data-s=walk] .lb,.sd[data-s=run] .lb{animation:lg .7s steps(1) infinite alternate-reverse}
+.sd[data-s=run] .la,.sd[data-s=run] .lb{animation-duration:.26s}
+@keyframes lg{from{transform:translateX(-2px)}to{transform:translateX(2px)}}
+.sd[data-s=walk] .bd{animation:bob .35s steps(1) infinite}
+.sd[data-s=run] .bd{animation:bob .26s steps(1) infinite}
+@keyframes bob{50%{transform:translateY(-1px)}}
+.sd .tail2{animation:tl 1.2s steps(1) infinite}
+@keyframes tl{50%{transform:translateY(-1px)}}
+.sd[data-s=eatside] .headg{animation:chew .45s steps(1) infinite alternate}
+@keyframes chew{from{transform:translateY(0)}to{transform:translateY(2px)}}
+.sd[data-s=pounce] .bd{animation:hop .5s steps(1) 2}
+@keyframes hop{50%{transform:translateY(-4px)}}
+
+/* sprites */
+#cat{container-type:size}
+.spr{--w:round(up,110cqw,80px);position:absolute;left:calc((100cqw - var(--w)) / 2);bottom:calc(8cqw - var(--w) * .2);width:var(--w);height:calc(var(--w) * .8);background:no-repeat 0 0 / calc(var(--w) * 8) 100%;background-image:var(--idle);image-rendering:pixelated;animation:f8 1.2s steps(8) infinite}
+.spr.kit{--w:round(down,90cqw,80px)}
+.spr[data-s=walk]{background-image:var(--walk);background-size:calc(var(--w) * 12) 100%;animation:f12 1s steps(12) infinite}
+.spr[data-s=run]{background-image:var(--run);animation:f8 .5s steps(8) infinite}
+.spr[data-s=sad]{background-image:var(--hurt);background-size:calc(var(--w) * 4) 100%;animation:fh 1.2s steps(3) infinite}
+.spr:is([data-s=happy],[data-s=pounce]){background-image:var(--jump);background-size:calc(var(--w) * 3) 100%;animation:f3 .6s steps(3) infinite}
+.spr:is([data-s=blep],[data-s=groom]){background-image:var(--attack);animation:f8 .9s steps(8) infinite}
+.spr[data-s=sleep]{animation:none;filter:brightness(.72) saturate(.8)}
+.spr[data-s=sleep]::after{content:"z Z";position:absolute;left:58%;top:8%;font:.7rem "Press Start 2P",monospace;color:var(--m);filter:none;animation:zz 3s steps(4) infinite}
+.spr.sd[data-s]{animation:f12 1s steps(12) infinite,bobt .5s steps(1) infinite!important}
+.spr.sd[data-s=run]{animation:f8 .5s steps(8) infinite,bobt .26s steps(1) infinite!important}
+@keyframes f8{to{background-position-x:calc(var(--w) * -8)}}
+@keyframes f12{to{background-position-x:calc(var(--w) * -12)}}
+@keyframes f3{to{background-position-x:calc(var(--w) * -3)}}
+@keyframes fh{from{background-position-x:calc(var(--w) * -1)}to{background-position-x:calc(var(--w) * -4)}}
+@keyframes bobt{50%{translate:0 -1cqw}}
+.ico{width:2.2rem;height:2.2rem;image-rendering:pixelated;vertical-align:middle;display:block;margin:0 auto}
+#food .ico{width:100%;height:auto}
+#dexg div{container-type:inline-size}
+#dexg .spr{position:relative;left:0;bottom:0;--w:100cqw}
+#dexg .lock .spr{filter:brightness(0);opacity:.25}
+#bowl{width:24%}
+</style>
+</head>
+<body>
+<div id="top">
+  <button id="nm">🐱 …</button>
+  <span id="lv"></span>
+  <span id="stars2">⭐ 0</span><button data-a="dex">📖</button><button data-a="cfg">⚙️</button>
+</div>
+<div id="stage">
+  <div id="screen"><svg id="bg" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice"></svg><div id="run"><div class="lay far"></div><div class="lay near"></div></div>
+    <div id="bowl"><svg viewBox="0 0 100 50"><path d="M10 14H90Q86 44 70 46H30Q14 44 10 14Z" fill="#ff9fc0" stroke="#e8749e" stroke-width="3"/><ellipse cx="50" cy="14" rx="40" ry="7" fill="#ffd3e4" stroke="#e8749e" stroke-width="3"/><circle cx="50" cy="31" r="3.5" fill="#fff"/><circle cx="43" cy="27" r="2" fill="#fff"/><circle cx="57" cy="27" r="2" fill="#fff"/></svg></div><div id="food"></div>
+    <div id="cat"></div><div id="toy">🧶</div>
+    <div id="litter"><div id="poos"></div><svg viewBox="0 0 100 70"><path d="M8 28L22 8H78L92 28Z" fill="#c9b6ff"/><ellipse cx="50" cy="26" rx="36" ry="8" fill="#f3e3b4"/><path d="M6 28H94L88 62Q88 66 82 66H18Q12 66 12 62Z" fill="#a58df0"/><rect x="6" y="26" width="88" height="8" rx="4" fill="#b9a2ff"/><path d="M26 46h48" stroke="#fff" opacity=".5" stroke-width="3" stroke-linecap="round"/></svg><span class="fly">🪰</span></div><div id="deco"></div></div>
+  <div id="bubble"></div>
+</div>
+<div id="stats"></div>
+<div id="special"></div>
+<div id="bar">
+  <button data-a="feed"><b><img class="ico" src="sprites/food/fish.png" alt=""></b>Manger</button>
+  <button data-a="play"><b>🧶</b>Jouer</button>
+  <button data-a="sleep"><b>🌙</b>Dodo</button>
+  <button data-a="bath"><b>🫧</b>Bain</button>
+  <button data-a="shop"><b>🛍️</b>Boutique</button>
+</div>
+
+<div class="ov" id="sheet" hidden>
+  <h2>Qu’est-ce qu’on mange ?</h2>
+  <div class="row" id="foods"></div>
+  <button class="opt" data-close>Annuler</button>
+</div>
+<div class="ov" id="dex" hidden>
+  <h2>Mes chats 📖</h2>
+  <div id="dexg"></div>
+  <div id="ach"></div>
+  <button class="opt" data-close>Fermer</button>
+</div>
+<div class="ov" id="cfg" hidden>
+  <h2>Réglages ⚙️</h2>
+  <button class="opt" id="snd">🔊</button>
+  <p>Alertes sur ton téléphone quand Neko a besoin de toi. Le vieux téléphone doit rester allumé avec l’app ouverte. Pas d’alerte la nuit (22 h – 8 h).</p>
+  <input id="ntf" placeholder="ntfy : nom du sujet (ex. neko-4821)" autocomplete="off">
+  <input id="tgt" placeholder="Telegram : token du bot" autocomplete="off">
+  <input id="tgc" placeholder="Telegram : chat id" autocomplete="off">
+  <div class="row"><button class="opt" id="tgd">🔎 Trouver mon chat id</button><button class="opt" id="tgs">📨 Envoyer un test</button></div>
+  <p id="cfgm"></p>
+  <button class="opt" data-close>Fermer</button>
+</div>
+<div class="ov" id="shop" hidden>
+  <h2>Boutique 🛍️ <span id="shs"></span></h2>
+  <div id="shopg"></div>
+  <button class="opt" data-close>Fermer</button>
+</div>
+<div class="ov" id="game" hidden>
+  <h2>Attrape la pelote ! <span id="sc">0</span></h2>
+  <button id="ball">🧶</button>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const KEY = "neko-v1";
+
+/* ---------- Robes (chats) ---------- */
+const COATS = [
+  { n: "Roux", c: "#f3a25b", b: "#fff0dc", s: "#d9803a", t: "stripe", w: 25 },
+  { n: "Gris", c: "#9aa5b5", b: "#eef1f6", s: "#6f7b8f", t: "stripe", w: 25 },
+  { n: "Noir", c: "#3d3b4d", b: "#6c6a80", s: null, t: "", w: 20, eye: "#ffd24d" },
+  { n: "Blanc", c: "#fcfcff", b: "#ffffff", s: null, t: "", w: 15 },
+  { n: "Calico", c: "#fff3e8", b: "#ffffff", s: "#f3a25b", s2: "#4a4358", t: "patch", w: 12 },
+  { n: "Lavande", c: "#c9b6ff", b: "#fff0fb", s: "#a58df0", t: "stripe", w: 7 },
+  { n: "Étoilé ✨", c: "#ffd76a", b: "#fff8dc", s: "#f0b429", t: "stripe", w: 0, shiny: 1 },
+  { n: "Siamois", c: "#f6e7d3", b: "#fffaf2", s: "#7a5a48", t: "points", w: 10, eye: "#5ab0ff", pt: "#7a5a48" },
+  { n: "Smoking", c: "#3d3b4d", b: "#ffffff", s: null, t: "tux", w: 12, eye: "#7fe0a0" },
+  { n: "Menthe", c: "#a8e6cf", b: "#f2fff9", s: "#7fcdb0", t: "stripe", w: 5 },
+  { n: "Bonbon", c: "#ffb3d1", b: "#fff0f6", s: "#ff8fb8", t: "stripe", w: 5 }
+];
+function roll() {
+  if (Math.random() < 1 / 48) return 6;
+  let r = Math.random() * COATS.reduce((a, k) => a + k.w, 0);
+  for (let i = 0; i < COATS.length; i++) { r -= COATS[i].w; if (r < 0) return i; }
+  return 0;
+}
+
+function acc(w, sc) {
+  const a = {
+    bow: [[R(26,3,30,8),"#ff6fa0"],[R(30,5,32,6),"#ff3d7f"],[R(32,3,36,8),"#ff6fa0"]],
+    flower: [[R(9,4,14,9),"#ffc2dc"],[R(10,5,13,8),"#ffd24d"]],
+    crown: [[R(13,4,27,8),"#ffd24d"],[R(13,2,15,4),"#ffd24d"],[R(19,1,21,4),"#ffd24d"],[R(25,2,27,4),"#ffd24d"]],
+    hat: [[R(14,0,26,7),"#2d2236"],[R(14,5,26,6),"#ff6fa0"],[R(11,7,29,8),"#2d2236"]],
+    glasses: [[R(8,13,18,19),"#1f1a2b"],[R(22,13,32,19),"#1f1a2b"],[R(18,15,22,16),"#1f1a2b"],[R(9,14,12,15),"#8a7ab0"],[R(23,14,26,15),"#8a7ab0"]],
+    scarf: [[R(9,24,31,28),"#ff6f6f"],[R(26,28,30,36),"#ff6f6f"],[R(26,31,30,32),"#fff"]]
+  }[w];
+  return a ? px(a, sc, 1) : "";
+}
+/* ---------- Pixel art (style Game Boy Color) ---------- */
+const OUT = "#1a1424";
+const sh = (hex, a) => { const n = parseInt(hex.slice(1), 16), t = a < 0 ? 0 : 255, q = Math.abs(a), f = v => Math.round(v + (t - v) * q);
+  return "#" + ((1 << 24) + (f(n >> 16) << 16) + (f((n >> 8) & 255) << 8) + f(n & 255)).toString(16).slice(1); };
+const E = (cx, cy, rx, ry) => (x, y) => ((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1;
+const R = (a, b, c, d) => (x, y) => x >= a && x < c && y >= b && y < d;
+const P = p => (x, y) => { let o = false; for (let i = 0, j = p.length - 1; i < p.length; j = i++) if ((p[i][1] > y) !== (p[j][1] > y) && x < (p[j][0] - p[i][0]) * (y - p[i][1]) / (p[j][1] - p[i][1]) + p[i][0]) o = !o; return o; };
+const MR = (a, b, c, d, col) => [[R(a, b, c, d), col], [R(40 - c, b, 40 - a, d), col]];
+function px(shapes, sc = 1, ol = 0, W = 40, H = 40) {
+  const g = new Array(W * H).fill(null);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const ox = W / 2 + (x + .5 - W / 2) / sc, oy = H + (y + .5 - H) / sc;
+    for (const [t, c] of shapes) if (t(ox, oy)) g[y * W + x] = c;
+  }
+  if (ol) { const f = g.slice();
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (!g[y * W + x] && [[1,0],[-1,0],[0,1],[0,-1]].some(([a, b]) => x + a >= 0 && x + a < W && y + b >= 0 && y + b < H && g[(y + b) * W + x + a])) f[y * W + x] = OUT;
+    for (let i = 0; i < f.length; i++) g[i] = f[i]; }
+  let s = "";
+  for (let y = 0; y < H; y++) { let x = 0; while (x < W) { const c = g[y * W + x]; if (!c) { x++; continue; } let n = 1; while (x + n < W && g[y * W + x + n] === c) n++; s += `<rect x="${x}" y="${y}" width="${n}" height="1" fill="${c}"/>`; x += n; } }
+  return s;
+}
+const GL = (cls, s, sc = 1, ol = 0) => `<g class="${cls}">${px(s, sc, ol)}</g>`;
+
+/* ---------- Sprites (chat xzany + nourriture Ghostpixxells) : recoloré à la volée pour chaque robe ---------- */
+const SH = ["idle", "walk", "run", "hurt", "jump", "attack"], SPR = {}, tinted = {}, TS = document.head.appendChild(document.createElement("style"));
+const hx = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+function recolor(img, keys) {
+  const cv = document.createElement("canvas"); cv.width = img.width; cv.height = img.height;
+  const cx = cv.getContext("2d"); cx.drawImage(img, 0, 0);
+  const d = cx.getImageData(0, 0, cv.width, cv.height), a = d.data;
+  for (let i = 0; i < a.length; i += 4) { if (!a[i + 3]) continue;
+    let best = null, bd = 300;
+    for (const [r, g, b, to] of keys) { const e = (a[i] - r) ** 2 + (a[i + 1] - g) ** 2 + (a[i + 2] - b) ** 2; if (e < bd) { bd = e; best = to; } }
+    if (best) { a[i] = best[0]; a[i + 1] = best[1]; a[i + 2] = best[2]; } }
+  cx.putImageData(d, 0, 0); return cv.toDataURL();
+}
+function tint(k) {
+  const id = COATS.indexOf(k); if (tinted[id] || SH.some(n => !SPR[n])) return id;
+  const s = (h, a) => hx(sh(h, a)), keys = [[230,156,105,hx(k.c)],[246,202,159,s(k.c,.28)],[191,111,74,s(k.c,-.2)],[138,72,54,s(k.c,-.4)],
+    [255,255,255,hx(k.b)],[199,207,221,s(k.b,-.1)],[146,161,185,s(k.b,-.3)]];
+  TS.textContent += `.t${id}{` + SH.map(n => `--${n}:url(${recolor(SPR[n], keys)})`).join(";") + "}"; tinted[id] = 1; return id;
+}
+Promise.all(SH.map(n => new Promise(r => { const i = new Image(); i.onload = () => { SPR[n] = i; r(); }; i.onerror = r; i.src = `sprites/cat/${n}.png`; })))
+  .then(() => { lastKey = ""; render(); });
+const IMG = n => `<img class="ico" src="sprites/food/${n}.png" alt="">`;
+const catSVG = (k, st, kit) => `<div class="cat spr${kit ? " kit" : ""} t${tint(k)}" data-s="${st}"></div>`;
+const catSide = (k, kit, wear, dir) => `<div class="cat spr sd${kit ? " kit" : ""} t${tint(k)}" data-s="walk" style="transform:scaleX(${dir})"></div>`;
+const eggSVG = t => `<svg class="cat" data-s="egg" viewBox="0 0 40 40">${px([[E(20,38.5,9,1.2),"#0002"]])}<g class="egg">${px([[E(20,24,11,14),"#fff3dc"],
+  [R(16,19,19,22),"#ffc0d8"],[R(23,27,27,30),"#bfe0ff"],[R(19,32,21,34),"#ffe08a"],[R(22,16,24,18),"#d5f2c8"],[R(15,15,17,18),"#fff"],
+  ...(t > 0 ? [[R(14,21,15,22),OUT],[R(15,22,16,23),OUT],[R(14,23,15,24),OUT],[R(15,24,16,25),OUT]] : []),
+  ...(t > 1 ? [[R(25,19,26,20),OUT],[R(24,20,25,21),OUT],[R(25,21,26,22),OUT],[R(24,22,25,23),OUT]] : [])], 1, 1)}</g></svg>`;
+
+function sceneSVG(id, ph) {
+  const c = PH[ph], n = ph === "night", out = id === "sc_garden" || id === "sc_beach", o = [];
+  if (out) {
+    o.push([R(0,0,40,14),c.s1],[R(0,14,40,26),c.s2]);
+    if (id === "sc_garden") o.push([E(8,27,14,6),c.g2],[R(0,26,40,40),c.g1],[R(0,31,40,32),c.g2],[R(30,15,32,27),"#b9825a"],[E(31,12,6,6),c.g2],[R(7,34,9,35),"#ff7aa8"],[R(20,36,22,37),"#ffd24d"],[R(33,35,35,36),"#fff"]);
+    else o.push([R(0,17,40,27),c.sea],[R(0,22,40,23),"#fff8"],[R(0,26,40,40),c.sand],[R(8,33,12,35),"#ffb3cf"]);
+    if (n) [[3,3],[12,6],[20,2],[28,8],[35,4],[8,11],[24,10]].forEach(([x, y]) => o.push([R(x,y,x+1,y+1),"#fff"]));
+    o.push(n ? [R(30,3,34,7),"#fff8d6"] : [R(30,3,35,8), ph === "day" ? "#ffd84d" : "#ff8a5c"]);
+    if (!n) o.push([R(8,5,15,7),"#fff"],[R(10,4,13,5),"#fff"]);
+  } else o.push([R(0,0,40,27),c.wall],[R(0,27,40,40),c.floor],[R(0,27,40,28),sh(c.floor,-.2)],[R(25,4,37,17),"#fff"],[R(26,5,36,16),c.s1],[R(30,5,31,16),"#fff"],[R(26,10,36,11),"#fff"],
+    ...(id === "sc_bed" ? [[R(2,21,17,31),c.bw],[R(2,21,5,31),sh(c.bw,-.2)],[R(5,24,17,27),"#fff"]] : [[R(5,5,12,12),sh(c.wall,-.2)],[R(6,6,11,11),c.bw]]),[E(20,35,13,3),c.bw]);
+  return `<g shape-rendering="crispEdges" transform="scale(5)">${px(o)}</g>`;
+}
+const mini = (W, H, s) => `<svg viewBox="0 0 ${W} ${H}" shape-rendering="crispEdges">${px(s, 1, 1, W, H)}</svg>`;
+$("#bowl").innerHTML = '<img src="sprites/food/bowl.png" alt="" style="width:100%;display:block;image-rendering:pixelated">';
+{ const sv0 = $("#litter svg"); if (sv0) sv0.outerHTML = mini(24, 14, [[R(2,2,22,4),"#f3e3b4"],[R(0,4,24,7),"#b9a2ff"],[R(1,7,23,14),"#a58df0"],[R(5,9,19,10),"#fff8"]]); }
+
+/* ---------- Décors (changent avec l’heure réelle) ---------- */
+const PH = {
+  day:   { s1: "#8fd3ff", s2: "#eaf8ff", wall: "#ffe6ef", floor: "#f0c8a0", g1: "#9ad88c", g2: "#78c96f", sea: "#6ec6ff", sand: "#ffe3a8", bw: "#e8dcff" },
+  dusk:  { s1: "#ff9e7d", s2: "#ffd9b8", wall: "#f5c6c9", floor: "#d9a37e", g1: "#a8b56f", g2: "#8a9d5e", sea: "#ff9d8a", sand: "#f0c58f", bw: "#d9bfe0" },
+  night: { s1: "#1d1b3a", s2: "#4a3f7a", wall: "#5b4f86", floor: "#6a5a7c", g1: "#3e6b5a", g2: "#2f5a4c", sea: "#243a73", sand: "#8a7a9a", bw: "#3d3566" }
+};
+/* ---------- Données & règles (inspirées de TamaPoke, en version douce) ---------- */
+const newPet = () => ({ stage: "egg", ci: roll(), name: "", age: 0, f: 80, j: 80, e: 80, h: 100, poo: 0, asleep: false, taps: 0, fav: (Math.random() * 3) | 0, fk: false });
+let G = JSON.parse(localStorage.getItem(KEY) || "null") || { pet: newPet(), dex: [], streak: 0, lastDay: "", last: Date.now(), mute: false };
+const save = () => localStorage.setItem(KEY, JSON.stringify(G));
+G.stars ??= 0; G.own ??= []; G.wear ??= ""; G.touch ??= Date.now(); G.best ??= 0; G.scene ??= "sc_salon"; G.tg ??= { t: "", c: "", n: "" }; G.notif ??= {}; if (!G.own.includes("sc_salon")) G.own.push("sc_salon");
+const clamp = v => Math.max(0, Math.min(100, v));
+const FOODS = [{ i: IMG("fish"), n: "Poisson", f: 25, j: 0 }, { i: IMG("flan"), n: "Flan", f: 15, j: 5 }, { i: IMG("cookie"), n: "Biscuit", f: 10, j: 12 }];
+const ITEMS = [
+  { id: "sc_salon", i: "🛋️", n: "Salon", p: 0, t: "scene" }, { id: "sc_garden", i: "🌳", n: "Jardin", p: 40, t: "scene" }, { id: "sc_bed", i: "🛏️", n: "Chambre", p: 60, t: "scene" }, { id: "sc_beach", i: "🏖️", n: "Plage", p: 80, t: "scene" }, { id: "sc_city", i: "🌃", n: "Ville", p: 100, t: "scene" },
+  { id: "bow", i: "🎀", n: "Nœud", p: 20, t: "acc" }, { id: "flower", i: "🌸", n: "Fleur", p: 30, t: "acc" },
+  { id: "scarf", i: "🧣", n: "Écharpe", p: 40, t: "acc" }, { id: "glasses", i: "🕶️", n: "Lunettes", p: 60, t: "acc" },
+  { id: "hat", i: "🎩", n: "Chapeau", p: 80, t: "acc" }, { id: "crown", i: "👑", n: "Couronne", p: 150, t: "acc" },
+  { id: "teddy", i: "🧸", n: "Nounours", p: 30, t: "deco" }, { id: "plant", i: "🪴", n: "Plante", p: 40, t: "deco" },
+  { id: "lamp", i: "🏮", n: "Lanterne", p: 50, t: "deco" }, { id: "fish", i: "🐠", n: "Aquarium", p: 60, t: "deco" }
+];
+const ACH = [
+  ["🍼 Premier chaton", () => G.dex.length >= 1], ["🔥 3 jours", () => G.streak >= 3], ["🔥 7 jours", () => G.streak >= 7],
+  ["🐈 Chat adulte", () => G.pet.stage === "cat" || G.fare], ["🎨 5 robes", () => G.dex.length >= 5],
+  ["🌈 Toutes les robes", () => G.dex.length >= COATS.length], ["🧶 Record 20+", () => G.best >= 20], ["🛍️ 3 achats", () => G.own.length >= 4]
+];
+const LVL_EVO = 6, FAREWELL_MIN = 72 * 60;
+const lvl = p => Math.floor(p.age / 60);
+
+function step(p) { // 1 minute réelle = 1 minute de jeu
+  p.age++;
+  if (p.stage === "egg") return;
+  if (p.asleep) { p.e += 3; p.f = Math.max(30, p.f - .15); p.j = Math.max(35, p.j - .12); p.h = Math.max(45, p.h - .1); }
+  else {
+    p.f -= .6; p.e -= .3; p.h -= .4 + 1.2 * p.poo;
+    p.j -= .5 + (p.f < 30 ? .5 : 0) + (p.h < 30 ? .5 : 0);
+    if (p.f > 40 && p.poo < 3 && Math.random() < .02) p.poo++;
+  }
+  p.f = clamp(p.f); p.j = clamp(p.j); p.e = clamp(p.e); p.h = clamp(p.h);
+}
+function advance() { // rattrape le temps passé (jusqu’à 2 semaines), même app fermée
+  const now = Date.now(); let m = Math.floor((now - G.last) / 60000);
+  if (m <= 0) return;
+  G.last += m * 60000;
+  for (let i = 0; i < Math.min(m, 20160); i++) step(G.pet);
+  save();
+}
+
+/* ---------- Son ---------- */
+let ac = null;
+function snd(seq, type = "sine", vol = .06, len = .3) {
+  if (G.mute) return;
+  ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+  const t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+  o.type = type; o.connect(g); g.connect(ac.destination);
+  seq.forEach(([f, d]) => o.frequency.linearRampToValueAtTime(f, t + d));
+  o.frequency.setValueAtTime(seq[0][0], t);
+  g.gain.setValueAtTime(vol, t); g.gain.linearRampToValueAtTime(0, t + len);
+  o.start(t); o.stop(t + len + .02);
+}
+const meow = () => snd([[650, 0], [950, .12], [700, .3]], "triangle", .07, .4);
+const pi = () => snd([[880, 0], [1180, .08]], "sine", .05, .15);
+
+/* ---------- Interface ---------- */
+let tmp = { s: "", until: 0 }, bubT, lastKey = "", bgKey = "";
+const pick = a => a[(Math.random() * a.length) | 0];
+function say(t, ms = 3500) {
+  const b = $("#bubble"); b.textContent = t; b.classList.add("on");
+  clearTimeout(bubT); bubT = setTimeout(() => b.classList.remove("on"), ms);
+}
+function burst(x, y, list = ["💖", "✨", "🌸"], n = 5) {
+  for (let i = 0; i < n; i++) {
+    const p = document.createElement("span");
+    p.className = "p"; p.textContent = pick(list);
+    p.style.left = x + (Math.random() - .5) * 60 + "px"; p.style.top = y + "px";
+    p.style.setProperty("--dx", (Math.random() - .5) * 120 + "px");
+    p.addEventListener("animationend", () => p.remove());
+    document.body.appendChild(p);
+  }
+}
+const mid = () => { const r = $("#screen").getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height * .6]; };
+function mood() {
+  const p = G.pet;
+  if (p.asleep) return "sleep";
+  if (tmp.until > Date.now()) return tmp.s;
+  return Math.min(p.f, p.j, p.e, p.h) < 20 ? "sad" : "idle";
+}
+function feel(s, ms = 2500) { tmp = { s, until: Date.now() + ms }; render(); setTimeout(render, ms + 50); }
+
+function render() {
+  const p = G.pet, k = COATS[p.ci];
+  if (p.stage === "egg" && (p.taps >= 3 || p.age >= 10)) return hatch();
+  if (p.asleep && life.mode === "side") { life.mode = "front"; life.act = "idle"; stopRun(); }
+  if (shownPoo > p.poo) shownPoo = p.poo;
+  const key = p.stage + p.ci + G.wear + life.mode + (life.mode === "side" ? life.dir : "") + (p.stage === "egg" ? p.taps : "");
+  if (key !== lastKey) { $("#cat").innerHTML = p.stage === "egg" ? eggSVG(p.taps) : life.mode === "side" ? catSide(k, p.stage === "kitten", G.wear, life.dir) : catSVG(k, mood(), p.stage === "kitten", G.wear); lastKey = key; }
+  const svg = $("#cat .cat"); if (svg && p.stage !== "egg") svg.dataset.s = life.mode === "side" ? life.act : mood();
+  const h = new Date().getHours();
+  const ph = p.asleep || h >= 21 || h < 5 ? "night" : (h >= 7 && h < 18 ? "day" : "dusk");
+  if (bgKey !== G.scene + ph) { bgKey = G.scene + ph; $("#bg").innerHTML = sceneSVG(G.scene, ph); }
+  $("#nm").textContent = "🐱 " + (p.name || "Œuf");
+  $("#lv").textContent = p.stage === "egg" ? "" : `Niv. ${lvl(p)}${G.streak > 1 ? "  🔥" + G.streak : ""}`;
+  $("#stars2").textContent = "⭐ " + G.stars;
+  $("#deco").innerHTML = ITEMS.filter(x => x.t === "deco" && G.own.includes(x.id)).map(x => x.i).join("");
+  $("#snd").textContent = G.mute ? "🔇" : "🔊";
+  $("#stats").innerHTML = [["🐟", p.f], ["🧶", p.j], ["⚡", p.e], ["🫧", p.h]]
+    .map(([i, v]) => `<div class="st">${i}<div class="bar"><i class="${v < 25 ? "low" : ""}" style="width:${v}%"></i></div></div>`).join("");
+  $("#poos").innerHTML = "<span>💩</span>".repeat(shownPoo); $("#litter").classList.toggle("dirty", shownPoo >= 2);
+  const sp = $("#special"); sp.innerHTML = "";
+  const ok = Math.min(p.f, p.j, p.e, p.h) >= 40;
+  if (p.stage === "kitten" && lvl(p) >= LVL_EVO && ok) sp.innerHTML = '<button data-a="grow">✨ Grandir</button>';
+  else if (p.stage === "cat" && p.age >= FAREWELL_MIN) sp.innerHTML = '<button data-a="bye">🏡 Confier à une famille</button>';
+}
+
+function hatch() {
+  const p = G.pet; p.stage = "kitten"; p.age = 0;
+  p.name = (prompt("Un chaton est né ! Comment s’appelle-t-il ?", "Mochi") || "Mochi").slice(0, 14);
+  if (!G.dex.includes(p.ci)) G.dex.push(p.ci);
+  save(); lastKey = ""; meow(); const [x, y] = mid(); burst(x, y);
+  say(p.ci === 6 ? "Un chat étoilé ! Rarissime ✨" : `${COATS[p.ci].n} ! Bienvenue ${p.name} 💕`, 4500);
+  feel("happy", 3000);
+}
+function care() { // série quotidienne
+  const d = new Date().toDateString();
+  if (G.lastDay === d) return;
+  const y = new Date(Date.now() - 864e5).toDateString();
+  G.streak = G.lastDay === y ? G.streak + 1 : 1; G.lastDay = d; G.stars += 3;
+  if ([3, 7, 30, 100].includes(G.streak)) say(`🔥 ${G.streak} jours de suite !`, 4500);
+}
+function act(fn) { advance(); G.touch = Date.now(); fn(); care(); save(); render(); }
+
+const ACTIONS = {
+  feed() { const p = G.pet; if (p.stage === "egg") return; if (p.asleep) return say("Chut, il dort 🌙");
+    $("#foods").innerHTML = FOODS.map((f, i) => `<button class="opt" data-f="${i}"><b>${f.i}</b>${f.n}</button>`).join("");
+    $("#sheet").hidden = false; },
+  play() { const p = G.pet; if (p.stage === "egg") return;
+    if (p.asleep) return say("Chut, il dort 🌙"); if (p.e < 15) return say("Trop fatigué pour jouer…");
+    const g = $("#game"), b = $("#ball"), T = [["🧶", 1], ["🧶", 1], ["🐭", 2], ["🐟", 3]];
+    let sc = 0, tm, alive = true; $("#sc").textContent = 0; g.hidden = false;
+    const mv = () => { const t = pick(T); b.textContent = t[0]; b.dataset.p = t[1];
+      b.style.left = 8 + Math.random() * 74 + "%"; b.style.top = 22 + Math.random() * 58 + "%";
+      if (alive) tm = setTimeout(mv, Math.max(450, 950 - sc * 30)); }; mv();
+    b.onpointerdown = e => { e.stopPropagation(); sc += +b.dataset.p; $("#sc").textContent = sc; burst(e.clientX, e.clientY, ["✨"], 2); pi(); clearTimeout(tm); mv(); };
+    setTimeout(() => { alive = false; clearTimeout(tm); g.hidden = true;
+      const st = Math.ceil(sc / 3), rec = sc > G.best; if (rec) G.best = sc; G.stars += st;
+      act(() => { p.j = clamp(p.j + 8 + sc * 3); p.e = clamp(p.e - 10); });
+      feel(sc > 8 ? "love" : "happy"); say(`${rec ? "Nouveau record ! " : ""}${sc} pts · +${st} ⭐`, 4000); }, 10000); },
+  shop() { shopRender(); $("#shop").hidden = false; },
+  cfg() { $("#tgt").value = G.tg.t; $("#tgc").value = G.tg.c; $("#ntf").value = G.tg.n; $("#cfgm").textContent = ""; $("#cfg").hidden = false; },
+  sleep() { const p = G.pet; if (p.stage === "egg") return; act(() => { p.asleep = !p.asleep; });
+    say(p.asleep ? "Bonne nuit 🌙" : "Bien dormi ! ☀️"); if (!p.asleep) meow(); },
+  bath() { const p = G.pet; if (p.stage === "egg") return; if (p.asleep) return say("Chut, il dort 🌙");
+    act(() => { p.h = 100; p.poo = 0; shownPoo = 0; }); const [x, y] = mid(); burst(x, y, ["🫧"], 7); feel("happy"); say("Tout propre ! 🫧"); },
+  dex() { $("#dexg").innerHTML = COATS.map((k, i) => `<div class="${G.dex.includes(i) ? "" : "lock"}">${catSVG(k, "idle", true).replace('class="cat"', 'class="cat" style="animation:none"')}${G.dex.includes(i) ? k.n : "???"}</div>`).join("");
+    $("#ach").innerHTML = ACH.map(([t, f]) => `<span class="${f() ? "ok" : ""}">${t}</span>`).join("");
+    $("#dex").hidden = false; },
+  grow() { const p = G.pet; act(() => { p.stage = "cat"; }); lastKey = ""; render(); meow();
+    const [x, y] = mid(); burst(x, y, ["✨", "💖"], 8); say(`${p.name} a bien grandi ! 😻`, 4500); feel("love", 3500); },
+  bye() { if (!confirm("Confier ce chat à une belle famille ? Un nouvel œuf apparaîtra.")) return;
+    const n = G.pet.name; G.fare = 1; G.stars += 20; G.pet = newPet(); lastKey = ""; save(); render(); say(`${n} est parti vers une famille aimante 🏡💛`, 5000); }
+};
+document.addEventListener("click", e => {
+  const a = e.target.closest("[data-a]"); if (a) { ACTIONS[a.dataset.a](); return; }
+  const it = e.target.closest("[data-it]");
+  if (it) { const x = ITEMS.find(v => v.id === it.dataset.it), own = G.own.includes(x.id);
+    if (!own) { if (G.stars < x.p) { say("Il te manque des ⭐ — joue avec ton chat !"); return; }
+      G.stars -= x.p; G.own.push(x.id); if (x.t === "acc") G.wear = x.id; if (x.t === "scene") G.scene = x.id; snd([[880, 0], [1320, .1], [1760, .2]], "sine", .06, .35); say(`${x.i} ${x.n} acheté !`); }
+    else if (x.t === "acc") G.wear = G.wear === x.id ? "" : x.id;
+    else if (x.t === "scene") G.scene = x.id;
+    save(); lastKey = ""; render(); shopRender(); return; }
+  const f = e.target.closest("[data-f]");
+  if (f) { const p = G.pet, d = FOODS[+f.dataset.f], fav = +f.dataset.f === p.fav;
+    $("#sheet").hidden = true;
+    act(() => { p.f = clamp(p.f + d.f + (fav ? 10 : 0)); p.j = clamp(p.j + d.j + (fav ? 10 : 0)); if (fav) p.fk = true; });
+    enqueue(() => lifeEat(d.i, fav)); pi();
+    say(fav ? `❤️ ${d.n}, son préféré !` : "Miam ! 😋"); return; }
+  if (e.target.closest("[data-close]")) { $("#sheet").hidden = true; $("#dex").hidden = true; $("#shop").hidden = true; $("#cfg").hidden = true; }
+  if (e.target.closest("#snd")) { G.mute = !G.mute; save(); render(); }
+  if (e.target.closest("#nm") && G.pet.stage !== "egg") { const n = prompt("Nouveau nom ?", G.pet.name); if (n) { G.pet.name = n.slice(0, 14); save(); render(); } }
+  if (e.target.closest("#litter")) cleanLitter();
+});
+$("#cat").addEventListener("pointerdown", e => { // caresse (ou tape sur l’œuf)
+  const p = G.pet; advance();
+  if (p.stage === "egg") { p.taps++; save(); lastKey = ""; render(); pi(); return; }
+  if (p.asleep) { act(() => { p.asleep = false; }); meow(); say("Hmm ? ☀️"); return; }
+  act(() => { p.j = clamp(p.j + 5); });
+  burst(e.clientX, e.clientY); snd([[120, 0], [160, .1], [120, .2]], "sawtooth", .03, .35);
+  feel("love", 2200); if (navigator.vibrate) navigator.vibrate(20);
+});
+
+function shopRender() {
+  $("#shs").textContent = "⭐ " + G.stars;
+  $("#shopg").innerHTML = ITEMS.map(x => { const own = G.own.includes(x.id), on = (x.t === "acc" && G.wear === x.id) || (x.t === "scene" && G.scene === x.id);
+    return `<button class="opt${on ? " on" : ""}" data-it="${x.id}"><b>${x.i}</b>${x.n}<br>${own ? (x.t === "acc" ? (on ? "Retirer" : "Porter") : x.t === "scene" ? (on ? "Actuel" : "Choisir") : "✓") : "⭐ " + x.p}</button>`; }).join("");
+}
+/* ---------- Brosse (glisser sur le chat), regard qui suit le doigt ---------- */
+let bx = null, bd = 0;
+$("#cat").addEventListener("pointerdown", e => { bx = [e.clientX, e.clientY]; bd = 0; });
+document.addEventListener("pointermove", e => {
+  const ey = $(".eyes"); if (ey) ey.style.transform = `translate(${Math.round((e.clientX / innerWidth - .5) * 2)}px,${Math.round((e.clientY / innerHeight - .3) * 1.5)}px)`;
+  if (bx && G.pet.stage !== "egg" && !G.pet.asleep) {
+    bd += Math.hypot(e.clientX - bx[0], e.clientY - bx[1]); bx = [e.clientX, e.clientY];
+    if (bd > 260) { bd = 0; act(() => { G.pet.j = clamp(G.pet.j + 2); }); burst(e.clientX, e.clientY, ["💗", "✨"], 1);
+      snd([[110, 0], [150, .1], [110, .2]], "sawtooth", .025, .3); feel("love", 1500); }
+  }
+});
+document.addEventListener("pointerup", () => { bx = null; });
+/* ---------- Papillon à attraper ---------- */
+function butterfly() {
+  if (G.pet.asleep || G.pet.stage === "egg") return;
+  const b = document.createElement("span"); b.className = "bf"; b.textContent = "🦋"; b.style.top = 12 + Math.random() * 40 + "%";
+  b.addEventListener("pointerdown", e => { e.stopPropagation(); G.stars += 2; act(() => { G.pet.j = clamp(G.pet.j + 6); });
+    burst(e.clientX, e.clientY, ["⭐", "✨"], 4); pi(); feel("happy"); say("Attrapé ! +2 ⭐"); b.remove(); });
+  b.addEventListener("animationend", () => b.remove());
+  $("#screen").appendChild(b);
+}
+setInterval(() => { if (Math.random() < .35) butterfly(); }, 40000);
+
+/* ---------- Alertes sur ton téléphone (Telegram / ntfy) ---------- */
+const cm = t => { $("#cfgm").textContent = t; };
+function notify(text) {
+  const { t, c, n } = G.tg;
+  if (t && c) fetch(`https://api.telegram.org/bot${t}/sendMessage`, { method: "POST", body: new URLSearchParams({ chat_id: c, text }) }).catch(() => {});
+  if (n) fetch("https://ntfy.sh/" + encodeURIComponent(n), { method: "POST", body: text }).catch(() => {});
+}
+function urgent() { // max 1 message par besoin et par heure, jamais la nuit
+  const p = G.pet, h = new Date().getHours();
+  if (p.asleep || p.stage === "egg" || h >= 22 || h < 8) return;
+  for (const [k, m] of [["f", "a faim 🐟"], ["h", "est tout sale 🫧"], ["j", "s’ennuie 🧶"], ["e", "est épuisé ⚡"]])
+    if (p[k] < 20 && Date.now() - (G.notif[k] || 0) > 3600000) { G.notif[k] = Date.now(); save(); notify(`🐱 ${p.name} ${m}`); break; }
+}
+[["#tgt", "t"], ["#tgc", "c"], ["#ntf", "n"]].forEach(([id, k]) => $(id).addEventListener("input", e => { G.tg[k] = e.target.value.trim(); save(); }));
+$("#tgs").onclick = () => { notify("🐱 Test Neko : ça marche ! 💕"); cm("Test envoyé. Regarde ton autre téléphone 📱"); };
+$("#tgd").onclick = () => {
+  if (!G.tg.t) return cm("Colle d’abord le token du bot.");
+  fetch(`https://api.telegram.org/bot${G.tg.t}/getUpdates`).then(r => r.json()).then(j => {
+    const m = (j.result || []).reverse().find(u => u.message);
+    if (m) { G.tg.c = String(m.message.chat.id); $("#tgc").value = G.tg.c; save(); cm("Chat id trouvé ✅"); }
+    else cm("Aucun message reçu : écris « coucou » à ton bot sur Telegram, puis réessaie.");
+  }).catch(() => cm("Token invalide ou pas de réseau."));
+};
+
+/* ---------- Vie : clignements, besoins, écran allumé ---------- */
+setInterval(() => { if (!G.pet.asleep && G.pet.stage !== "egg") { document.body.classList.add("blink"); setTimeout(() => document.body.classList.remove("blink"), 140); } }, 4200);
+setInterval(() => {
+  advance(); const p = G.pet, h = new Date().getHours();
+  if (p.stage !== "egg") {
+    if (!p.asleep && (h >= 23 || h < 6) && Date.now() - G.touch > 300000) { p.asleep = true; save(); say("Bonne nuit… 🌙"); }
+    else if (p.asleep && h >= 7 && h < 23 && p.e >= 100) { p.asleep = false; save(); say("Bien dormi ! ☀️"); }
+    else if (!p.asleep && mood() === "idle" && Math.random() < .12) feel("blep", 1300);
+  }
+  render();
+}, 5000);
+setInterval(() => {
+  const p = G.pet; if (p.asleep || p.stage === "egg") return;
+  const need = shownPoo >= 2 ? "La litière est sale… 💩" : p.f < 30 ? "J’ai faim… 🐟" : p.h < 30 ? "Je suis tout sale… 🫧" : p.j < 30 ? "Joue avec moi ! 🧶" : p.e < 30 ? "J’ai sommeil… 🌙" : "";
+  if (need) { say(need); meow(); }
+  urgent();
+}, 60000);
+const wake = () => { if ("wakeLock" in navigator) navigator.wakeLock.request("screen").catch(() => {}); };
+document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") { advance(); render(); wake(); } });
+document.addEventListener("pointerdown", wake, { once: true });
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+/* ---------- La vie de Neko : il se promène, court, fait sa toilette, va à la litière ---------- */
+const life = { mode: "front", act: "idle", dir: 1, x: 0, busy: false };
+let shownPoo = G.pet.poo;
+const queue = [], rnd = (a, b) => a + Math.random() * (b - a), wait = ms => new Promise(r => setTimeout(r, ms));
+const sv = (w, h, inner) => `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">${inner}</svg>`;
+const tile = t => `url("data:image/svg+xml,${encodeURIComponent(t)}")`;
+const WAVES = y => `<path d="M0 ${y}q12-8 25 0t25 0 25 0 25 0 25 0 25 0 25 0 25 0" fill="none" stroke="#fff" stroke-width="3" opacity=".7"/>`;
+const INDOOR = { far: sv(200, 80, ""), near: sv(200, 64, '<rect y="6" width="200" height="58" fill="#e7b88b"/><rect y="2" width="200" height="6" fill="#fff"/><path d="M0 28H200M0 48H200M50 6V28M150 6V28M100 28V48M30 48V64M130 48V64" stroke="#d29f72" stroke-width="2"/>') };
+const RUNS = {
+  sc_garden: { far: sv(200, 80, '<path d="M0 80V44Q25 20 50 44T100 40T150 44T200 44V80Z" fill="#a8e6a0"/><rect x="30" y="30" width="5" height="22" fill="#b9825a"/><circle cx="32" cy="26" r="12" fill="#5fc46a"/><rect x="140" y="34" width="5" height="20" fill="#b9825a"/><circle cx="142" cy="30" r="11" fill="#76d680"/>'),
+    near: sv(200, 64, '<rect y="8" width="200" height="56" fill="#7ccf75"/><rect y="6" width="200" height="6" fill="#9ae08f"/>' + [20, 70, 120, 170].map(x => `<path d="M${x} 26l3-10 3 10 3-12 3 12 3-9 3 9z" fill="#5fb45f"/>`).join("") + '<circle cx="45" cy="50" r="4" fill="#ff7aa8"/><circle cx="95" cy="46" r="4" fill="#fff"/><circle cx="145" cy="52" r="4" fill="#ffd24d"/><circle cx="188" cy="44" r="4" fill="#b79bff"/>') },
+  sc_beach: { far: sv(200, 80, '<rect y="30" width="200" height="50" fill="#6ec6ff"/>' + WAVES(40) + WAVES(60) + '<path d="M100 28V8L116 28Z" fill="#fff"/><path d="M96 28H120L116 34H100Z" fill="#c9825a"/>'),
+    near: sv(200, 64, '<rect y="8" width="200" height="56" fill="#ffe3a8"/><path d="M0 12q12-8 25 0t25 0 25 0 25 0 25 0 25 0 25 0 25 0V6H0Z" fill="#fff" opacity=".85"/><ellipse cx="40" cy="40" rx="8" ry="5" fill="#ffb3cf"/><ellipse cx="120" cy="50" rx="7" ry="4" fill="#ffd0a0"/><circle cx="80" cy="30" r="2" fill="#e8c98a"/><circle cx="165" cy="36" r="2" fill="#e8c98a"/>') },
+  sc_city: { far: sv(200, 80, '<rect x="6" y="30" width="30" height="50" fill="#6b6a95"/><rect x="40" y="14" width="26" height="66" fill="#58567f"/><rect x="72" y="34" width="34" height="46" fill="#6b6a95"/><rect x="112" y="22" width="28" height="58" fill="#58567f"/><rect x="146" y="38" width="22" height="42" fill="#6b6a95"/><rect x="172" y="18" width="24" height="62" fill="#58567f"/>' +
+      [[12, 36], [24, 36], [46, 22], [56, 22], [46, 40], [56, 40], [80, 42], [94, 42], [118, 30], [128, 30], [178, 26], [188, 26], [178, 44], [188, 44]].map(([x, y]) => `<rect x="${x}" y="${y}" width="5" height="6" fill="#ffe58a"/>`).join("")),
+    near: sv(200, 64, '<rect y="6" width="200" height="58" fill="#5d5b78"/><rect y="2" width="200" height="8" fill="#9a98b8"/><rect x="10" y="36" width="34" height="5" rx="2" fill="#fff" opacity=".8"/><rect x="110" y="36" width="34" height="5" rx="2" fill="#fff" opacity=".8"/>') }
+};
+function startRun() {
+  const r = RUNS[G.scene] || INDOOR, h = new Date().getHours();
+  $(".far").style.backgroundImage = tile(r.far); $(".near").style.backgroundImage = tile(r.near);
+  $("#run").className = "on " + (G.pet.asleep || h >= 21 || h < 5 ? "night" : h >= 7 && h < 18 ? "" : "dusk");
+  $("#screen").classList.add("running");
+}
+function stopRun() { $("#run").classList.remove("on"); $("#screen").classList.remove("running"); }
+
+const setX = (x, sec) => { const c = $("#cat"); c.style.transition = `transform ${sec}s linear`; c.style.transform = `translateX(${x}%)`; life.x = x; };
+async function go(x, run) { // marche (ou court) jusqu’à x %
+  const dx = x - life.x; if (Math.abs(dx) < 1 || G.pet.asleep) return;
+  life.dir = dx > 0 ? 1 : -1; life.mode = "side"; life.act = run ? "run" : "walk"; render();
+  const sec = Math.abs(dx) / (run ? 18 : 6); setX(x, sec); await wait(sec * 1000 + 80);
+}
+function rest() { life.mode = "front"; life.act = "idle"; render(); }
+function enqueue(fn) { queue.push(fn); pump(); }
+async function pump() {
+  if (life.busy) return; const fn = queue.shift(); if (!fn) return;
+  life.busy = true; try { await fn(); } catch (e) {} life.busy = false; stopRun(); pump();
+}
+const ACTS = {
+  async walk() { await go(rnd(-14, 14)); rest(); },
+  async run() { await go(0); life.mode = "side"; life.act = "run"; life.dir = 1; render(); startRun(); await wait(rnd(4500, 6500)); stopRun(); rest(); },
+  async groom() { feel("groom", 3200); await wait(3300); },
+  async stretch() { feel("stretch", 1900); await wait(2000); },
+  async chase() {
+    const tx = life.x > 0 ? rnd(-14, -6) : rnd(6, 14), toy = $("#toy"), d = tx > life.x ? 1 : -1;
+    toy.style.left = (47 + tx + d * 24) + "%"; toy.classList.remove("roll"); toy.classList.add("on");
+    await go(tx); life.act = "pounce"; render(); await wait(1000);
+    toy.classList.add("roll"); toy.style.left = (47 + tx + d * 40) + "%"; await wait(900);
+    toy.classList.remove("on", "roll"); rest();
+  }
+};
+async function lifeEat(icon, fav) { // il va à sa gamelle
+  await go(-14); life.dir = -1; life.mode = "side"; life.act = "eatside"; render();
+  $("#food").innerHTML = icon; $("#food").classList.add("on"); await wait(2400); $("#food").classList.remove("on");
+  rest(); feel(fav ? "love" : "happy", 2200);
+}
+async function goLitter() { // il va à la litière : le caca apparaît après
+  try {
+    await go(22); life.dir = 1; life.mode = "side"; life.act = "walk"; render();
+    $("#cat").style.opacity = 0; $("#litter").classList.add("busy"); await wait(2200);
+  } finally {
+    shownPoo = G.pet.poo; $("#litter").classList.remove("busy"); $("#cat").style.opacity = 1; render();
+  }
+  await go(0); rest(); feel("happy", 2000);
+}
+function cleanLitter() {
+  const p = G.pet;
+  if (!shownPoo) { say("La litière est propre ✨"); return; }
+  const n = shownPoo, r = $("#litter").getBoundingClientRect(), L = $("#litter");
+  L.classList.add("scoop"); setTimeout(() => L.classList.remove("scoop"), 800);
+  act(() => { p.poo = 0; p.h = clamp(p.h + 8 * n); G.stars += 1; }); shownPoo = 0; render();
+  burst(r.left + r.width / 2, r.top, ["✨", "🫧"], 5); pi(); say("Litière nettoyée ! +1 ⭐");
+}
+setInterval(() => { // le chat fait sa vie
+  const p = G.pet;
+  if (p.stage === "egg") return;
+  if (p.asleep) { shownPoo = p.poo; return; }
+  if (life.busy || queue.length || document.hidden) return;
+  if (p.poo > shownPoo) { enqueue(goLitter); return; }
+  if (mood() !== "idle" || Math.random() > .55) return;
+  const out = ["sc_garden", "sc_beach", "sc_city"].includes(G.scene);
+  enqueue(ACTS[pick(["walk", "walk", "groom", "stretch", "chase", ...(out ? ["run", "run", "run"] : ["run"])])]);
+}, 4000);
+
+advance(); render();
+</script>
+</body>
+</html>
